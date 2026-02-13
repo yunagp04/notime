@@ -1,0 +1,34 @@
+{
+  "name": "notime-backend",
+  "version": "1.0.0",
+  "type": "module",
+  "description": "",
+  "main": "src/index.js",
+  "directories": {
+    "doc": "docs"
+  },
+  "scripts": {
+    "start": "func start",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/yunagp04/notime.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/yunagp04/notime/issues"
+  },
+  "homepage": "https://github.com/yunagp04/notime#readme",
+  "dependencies": {
+    "@azure/functions": "^4.0.0",
+    "@azure/cosmos": "^4.9.0",
+    "mssql": "^12.2.0",
+    "@google/genai": "^1.34.0",
+    "@google/generative-ai": "^0.24.1",
+    "axios": "^1.13.2",
+    "dotenv": "^17.2.3"
+  }
+}

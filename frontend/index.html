@@ -7,11 +7,9 @@
 </head>
 <body>
     <h2>add vocab</h2>
-    <input type="text" id="word" placeholder="vocabulary">
+    <input type="text" id="title" placeholder="vocabulary">
     <br><br>
-    <input type="text" id="meaning" placeholder="meaning (option)">
-    <br><br>
-    <input type="text" id="sentence" placeholder="examples (option)">
+    <input type="text" id="content" placeholder="meaning (option)">
     <br><br>
     <button id="saveButton">save</button>
 
@@ -23,12 +21,11 @@
     <thead>
         <tr>
         <th>Word</th>
-        <th>Meaning</th>
-        <th>Sentence</th>
+        <th>Content</th> <th>Language</th>
         <th>Action</th>
         </tr>
     </thead>
-    <tbody></tbody>
+    <tbody id="vocabTableBody"></tbody>
     </table>
 
     <script src="main.js"></script>
