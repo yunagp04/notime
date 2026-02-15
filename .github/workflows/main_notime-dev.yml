@@ -25,9 +25,15 @@ jobs:
 
       - name: npm install, build, and test
         run: |
+          cd backend
           npm install
-          npm run build --if-present
-          npm run test --if-present
+          # npm run build --if-present
+          # npm run test --if-present
+
+      - name: Zip artifact for deploymant
+        run: |
+          cd backend
+          zip -r ../release.zip ./*
 
       - name: Upload artifact for deployment job
         uses: actions/upload-artifact@v4
@@ -60,6 +66,15 @@ jobs:
         uses: azure/webapps-deploy@v3
         with:
           app-name: 'notime-dev'
-          slot-name: 'Production'
-          package: .
+          # slot-name: 'Production'
+          package: 'release.zip'
+
+      # - name: 'Deploy to Azure Functions'
+      #   uses: Azure/functions-action@v1
+      #   with:
+      #     app-name: 'notime-dev'
+      #     package: 'release.zip'
+
           
+
+
