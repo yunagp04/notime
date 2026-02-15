@@ -7,7 +7,7 @@ import { connectDB } from "../db.Config.js";
 
 const router = express.Router();
 
-router.get("/getVocabs", async (req, res) => {
+router.get("/", async (req, res) => {
   console.log("getVocabs (SQL Version with Auth) started");
 
   try {

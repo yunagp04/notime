@@ -7,7 +7,7 @@ import { connectDB } from "../db.Config.js";
 
 const router = express.Router();
 
-router.post("/saveVocab", async (req, res) => {
+router.post("/", async (req, res) => {
   console.log("saveVocab (SQL Version) started");
 
   try {

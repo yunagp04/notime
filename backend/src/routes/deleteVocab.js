@@ -7,7 +7,7 @@ import { connectDB } from "../db.Config.js";
 
 const router = express.Router();
 
-router.delete("/deleteVocab", async (req, res) => {
+router.delete("/:id", async (req, res) => {
   try {
     const id = req.query.id;
 

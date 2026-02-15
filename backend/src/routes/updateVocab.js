@@ -7,7 +7,7 @@ import { connectDB } from "../db.Config.js";
 
 const router = express.Router();
 
-router.put("/updateVocab", async (req, res) => {
+router.put("/:id", async (req, res) => {
   try {
     const { id, title, content } = req.body;
 
