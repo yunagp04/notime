@@ -2,8 +2,8 @@
 
 let editId = null;
 
-const API_URL = "https://notime-dev-crg8ckdnfxaqd8fc.koreacentral-01.azurewebsites.net/api";
-// const API_URL = "/api";
+// const API_URL = "https://notime-dev-crg8ckdnfxaqd8fc.koreacentral-01.azurewebsites.net/api";
+const API_URL = "/api";
 // const API_URL =
 //   window.location.hostname === "localhost"
 //     ? "/api"
