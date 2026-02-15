@@ -31,7 +31,7 @@ document.getElementById("saveButton").addEventListener("click", async () => {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ title, content }),
-        credentials: "include",
+        // credentials: "include",
       });
 
       editId = null;
@@ -62,7 +62,7 @@ document.getElementById("saveButton").addEventListener("click", async () => {
 async function loadVocabs() {
   try {
     const res = await fetch(`${API_URL}/vocabs`, {
-      credentials: "include",
+      // credentials: "include",
     });
 
     const data = await res.json();
@@ -115,7 +115,7 @@ async function deleteVocab(id) {
 
   await fetch(`${API_URL}/vocabs/${id}`, {
     method: "DELETE",
-    credentials: "include",
+    // credentials: "include",
   });
 
   loadVocabs();
