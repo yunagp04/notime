@@ -27,17 +27,17 @@ document.getElementById("saveButton").addEventListener("click", async () => {
     }
 
     if (editId) {
-      await fetch(`${API_URL}/updateVocab`, {
+      await fetch(`${API_URL}/vocabs/${editId}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ id: editId, title, content }),
+        body: JSON.stringify({ title, content }),
         credentials: "include",
       });
 
       editId = null;
       document.getElementById("saveButton").innerText = "Save";
     } else {
-      await fetch(`${API_URL}/saveVocab`, {
+      await fetch(`${API_URL}/vocabs`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -61,7 +61,7 @@ document.getElementById("saveButton").addEventListener("click", async () => {
 
 async function loadVocabs() {
   try {
-    const res = await fetch(`${API_URL}/getVocabs`, {
+    const res = await fetch(`${API_URL}/vocabs`, {
       credentials: "include",
     });
 
@@ -113,7 +113,7 @@ async function loadVocabs() {
 async function deleteVocab(id) {
   if (!confirm("Delete this item?")) return;
 
-  await fetch(`${API_URL}/deleteVocab?id=${id}`, {
+  await fetch(`${API_URL}/vocabs/${id}`, {
     method: "DELETE",
     credentials: "include",
   });
