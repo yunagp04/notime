@@ -11,3 +11,17 @@ import './functions/updateVocab.js';
 app.setup({
     enableHttpStream: true,
 });
+
+
+import express from 'express';
+import { fileURLToPath } from 'url';
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+const appServer = express();
+
+appServer.use(express.static(path.join(__dirname, '../../frontend')));
+
+const port = process.env.WEBSITES_PORT || 8080;
+appServer.listen(port, () => {
+    console.log(`Server is running on port ${port}`);
+});
