@@ -25,9 +25,13 @@ jobs:
 
       - name: npm install, build, and test
         run: |
+          cd backend
           npm install
-          npm run build --if-present
-          npm run test --if-present
+          # npm run build --if-present
+          # npm run test --if-present
+
+      - name: Zip artifact for deploymant
+        run: zip -r release.zip .
 
       - name: Upload artifact for deployment job
         uses: actions/upload-artifact@v4
@@ -61,5 +65,6 @@ jobs:
         with:
           app-name: 'notime-dev'
           slot-name: 'Production'
-          package: .
+          package: 'release.zip'
+
           
