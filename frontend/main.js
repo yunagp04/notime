@@ -45,7 +45,7 @@ document.getElementById("saveButton").addEventListener("click", async () => {
           content,
           language: "en",
         }),
-        credentials: "include",
+        // credentials: "include",
       });
     }
 
