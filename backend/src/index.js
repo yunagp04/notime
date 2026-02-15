@@ -1,27 +1,32 @@
 // backend/src/index.js
-import { app } from '@azure/functions';
-import dotenv from 'dotenv';
+
+import express from "express";
+import dotenv from "dotenv";
+import path from "path";
+import { fileURLToPath } from "url";
+
 dotenv.config();
 
-import './functions/saveVocab.js';
-import './functions/getVocabs.js';
-import './functions/deleteVocab.js';
-import './functions/updateVocab.js';
-
-app.setup({
-    enableHttpStream: true,
-});
-
-
-import express from 'express';
-import { fileURLToPath } from 'url';
-
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const appServer = express();
+const app = express();
 
-appServer.use(express.static(path.join(__dirname, '../../frontend')));
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 
-const port = process.env.WEBSITES_PORT || 8080;
-appServer.listen(port, () => {
-    console.log(`Server is running on port ${port}`);
+import saveVocabRoute from "./routes/saveVocab.js";
+import getVocabsRoute from "./routes/getVocabs.js";
+import deleteVocabRoute from "./routes/deleteVocab.js";
+import updateVocabRoute from "./routes/updateVocab.js";
+
+app.use("/api", saveVocabRoute);
+app.use("/api", getVocabsRoute);
+app.use("/api", deleteVocabRoute);
+app.use("/api", updateVocabRoute);
+
+app.use(express.static(path.join(__dirname, "../../frontend")));
+
+const port = process.env.PORT || 8080;
+
+app.listen(port, () => {
+  console.log(`🚀 Server is running on port ${port}`);
 });

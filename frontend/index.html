@@ -1,33 +1,78 @@
+// frontend/index.html
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Vocabulary Memo</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Vocabulary Memo</title>
+
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      max-width: 700px;
+      margin: 40px auto;
+      padding: 20px;
+    }
+
+    input {
+      width: 100%;
+      padding: 8px;
+      margin-bottom: 10px;
+    }
+
+    button {
+      padding: 8px 16px;
+      cursor: pointer;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 20px;
+    }
+
+    th, td {
+      padding: 8px;
+      text-align: left;
+    }
+
+    th {
+      background-color: #f2f2f2;
+    }
+  </style>
 </head>
 <body>
-    <h2>add vocab</h2>
-    <input type="text" id="title" placeholder="vocabulary">
-    <br><br>
-    <input type="text" id="content" placeholder="meaning (option)">
-    <br><br>
-    <button id="saveButton">save</button>
 
-    <p id="result"></p>
+  <h2>Add Vocabulary</h2>
 
-    <h3>Vocabulary List</h3>
+  <form id="vocabForm">
+    <label for="title">Word</label>
+    <input type="text" id="title" placeholder="Vocabulary" required />
 
-    <table border="1" id="vocabTable">
+    <label for="content">Meaning (optional)</label>
+    <input type="text" id="content" placeholder="Meaning" />
+
+    <button type="submit" id="saveButton">Save</button>
+  </form>
+
+  <p id="result"></p>
+
+  <h3>Vocabulary List</h3>
+
+  <table>
     <thead>
-        <tr>
+      <tr>
         <th>Word</th>
-        <th>Content</th> <th>Language</th>
+        <th>Content</th>
+        <th>Language</th>
         <th>Action</th>
-        </tr>
+      </tr>
     </thead>
     <tbody id="vocabTableBody"></tbody>
-    </table>
+  </table>
 
-    <script src="main.js"></script>
+  <script src="main.js"></script>
+
 </body>
 </html>
