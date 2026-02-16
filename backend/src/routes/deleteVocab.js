@@ -9,7 +9,7 @@ const router = express.Router();
 
 router.delete("/:id", async (req, res) => {
   try {
-    const id = req.query.id;
+    const id = req.params.id;
 
     if (!id) {
       return res.status(400).json({ error: "Missing id" });
@@ -44,8 +44,8 @@ router.delete("/:id", async (req, res) => {
     res.status(500).json({
       error: error.message,
     });
-  } finally {
-    await sql.close();
+  // } finally {
+  //   await sql.close();
   }
 });
 

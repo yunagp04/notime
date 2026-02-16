@@ -57,8 +57,8 @@ router.post("/", async (req, res) => {
     res.status(500).json({
       error: error.message,
     });
-  } finally {
-    await sql.close();
+//   } finally {
+//     await sql.close();
   }
 });
 

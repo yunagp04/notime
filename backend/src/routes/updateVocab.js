@@ -9,7 +9,8 @@ const router = express.Router();
 
 router.put("/:id", async (req, res) => {
   try {
-    const { id, title, content } = req.body;
+    const id = req.params.id;
+    const { title, content } = req.body;
 
     if (!id) {
       return res.status(400).json({ error: "Missing id" });
@@ -49,8 +50,8 @@ router.put("/:id", async (req, res) => {
     res.status(500).json({
       error: error.message,
     });
-  } finally {
-    await sql.close();
+  // } finally {
+  //   await sql.close();
   }
 });
 

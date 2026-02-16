@@ -35,8 +35,8 @@ router.get("/", async (req, res) => {
   } catch (error) {
     console.error("SQL ERROR:", error);
     res.status(500).json({ error: error.message });
-  } finally {
-    await sql.close();
+  // } finally {
+  //   await sql.close();
   }
 });
 
