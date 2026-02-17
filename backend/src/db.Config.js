@@ -22,6 +22,8 @@ export const sqlConfig = {
   },
 };
 
+let pool;
+
 // Cosmos DB configuration (optional)
 export const cosmosConfig = {
   connectionString: process.env.COSMOS_CONNECTION_STRING,
@@ -30,8 +32,12 @@ export const cosmosConfig = {
 // helper function for connecting
 export const connectDB = async () => {
   try {
-    const pool = await sql.connect(sqlConfig);
-    console.log("Connected to MSSQL");
+    if (pool) {
+      return pool;
+    }
+
+    pool = await sql.connect(sqlConfig);
+    console.log("Connected to MSSQL (global pool)");
     return pool;
   } catch (err) {
     console.error("Database connection failed:", err);
