@@ -14,7 +14,7 @@ const app = express();
 app.use(cors({
   origin: '*',
   allowedHeaders: ['Content-Type', 'X-CSRF-Signature'],
-  credentials: true
+  // credentials: true
 }));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
