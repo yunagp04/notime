@@ -27,26 +27,38 @@ document.getElementById("saveButton").addEventListener("click", async () => {
     }
 
     if (editId) {
-      await fetch(`${API_URL}/vocabs/${editId}`, {
+      const response = await fetch(`${API_URL}/vocabs/${editId}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ title, content }),
-        // credentials: "include",
       });
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(errorText);
+      }
+
+      await response.json();
 
       editId = null;
       document.getElementById("saveButton").innerText = "Save";
     } else {
-      await fetch(`${API_URL}/vocabs`, {
+      const response = await fetch(`${API_URL}/vocabs`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           title,
           content,
-          language: "en",
+          language: "en"
         }),
-        // credentials: "include",
       });
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(errorText);
+      }
+
+      await response.json();
     }
 
     document.getElementById("title").value = "";
