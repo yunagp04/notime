@@ -21,25 +21,19 @@ jobs:
       - name: Set up Node.js version
         uses: actions/setup-node@v3
         with:
-          node-version: '24.x'
+          node-version: '24-lts'
 
       - name: npm install, build, and test
         run: |
-          cd backend
           npm install
-          # npm run build --if-present
-          # npm run test --if-present
-
-      - name: Zip artifact for deploymant
-        run: |
-          cd backend
-          zip -r ../release.zip ./*
+          npm run build --if-present
+          npm run test --if-present
 
       - name: Upload artifact for deployment job
         uses: actions/upload-artifact@v4
         with:
           name: node-app
-          path: release.zip
+          path: .
 
   deploy:
     runs-on: ubuntu-latest
@@ -57,24 +51,15 @@ jobs:
       - name: Login to Azure
         uses: azure/login@v2
         with:
-          client-id: ${{ secrets.AZUREAPPSERVICE_CLIENTID_F76C92EC4AFB4A5BB6ADE61ABA683288 }}
-          tenant-id: ${{ secrets.AZUREAPPSERVICE_TENANTID_FC09A9B9A45D400495C2106A86104979 }}
-          subscription-id: ${{ secrets.AZUREAPPSERVICE_SUBSCRIPTIONID_0DD5B40B8B6C4C1DA841E7428543E643 }}
+          client-id: ${{ secrets.AZUREAPPSERVICE_CLIENTID_F1584EED87964D2E88A1BF335E8573A9 }}
+          tenant-id: ${{ secrets.AZUREAPPSERVICE_TENANTID_74566522C55C4D9EB8B51022594F0E04 }}
+          subscription-id: ${{ secrets.AZUREAPPSERVICE_SUBSCRIPTIONID_B837FC7BBB174ABFBF95BC63F16F2742 }}
 
       - name: 'Deploy to Azure Web App'
         id: deploy-to-webapp
         uses: azure/webapps-deploy@v3
         with:
           app-name: 'notime-dev'
-          # slot-name: 'Production'
-          package: 'release.zip'
-
-      # - name: 'Deploy to Azure Functions'
-      #   uses: Azure/functions-action@v1
-      #   with:
-      #     app-name: 'notime-dev'
-      #     package: 'release.zip'
-
+          slot-name: 'Production'
+          package: .
           
-
-
