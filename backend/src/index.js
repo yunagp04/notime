@@ -30,7 +30,7 @@ app.use("/api/vocabs", deleteVocabRoute);
 app.use("/api/vocabs", updateVocabRoute);
 
 
-app.use(express.static(path.join(__dirname, "../../frontend")));
+app.use(express.static(path.join(__dirname, "../public")));
 
 const port = process.env.PORT || 8080;
 
