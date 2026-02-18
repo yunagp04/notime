@@ -133,4 +133,37 @@ async function deleteVocab(id) {
   loadVocabs();
 }
 
+async function generateMeanings() {
+  const btn = document.getElementById("generateBtn");
+
+  if (btn,disabled) return;
+
+  btn.disabled = true;
+  btn.innertext = "Generating...";
+
+  try {
+    const res = await fetch(`${API_URL}/vocabs/generate`, {
+      method: "POST"
+    });
+
+    const data = await res.json();
+    alert(data.message);
+
+    loadVocabs();
+  } catch (err) {
+    console.error(err);
+    alert("Generate failed");
+  }
+
+  btn.disabled = false;
+  btn.innerText = "Generate Meanings";
+}
+
+async function logout() {
+  await fetch(`${API_URL}/auth/logout`, {
+    method: "POST"
+  });
+
+  window.location.href = "/login.html"
+}
 loadVocabs();

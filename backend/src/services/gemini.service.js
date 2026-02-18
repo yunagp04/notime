@@ -7,3 +7,34 @@ export async function analyzeVocab(word) {
     const result = await model.generateContent(`${word} meaning briefly`);
     return result.response.text();
 }
+
+export async function analyzeBatch(words) {
+    const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
+    const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
+
+    const wordList = words.map(w => w.title).join("\n");
+
+    const prompt = `
+    Generate brief English meanings for the following words.
+    Return ONLY valid JSON array format like:
+
+    [
+    { "title": "word1", "meaning": "..." },
+    { "title": "word2", "meaning": "..." }
+    ]
+
+    Words:
+    ${wordList}
+    `;
+
+    const result = await model.generateContent(prompt);
+    const text = result.response.text();
+
+    const clean = text
+        .replace(/```json/g, "")
+        .replace(/```/g, "")
+        .trim();
+
+    return clean;
+
+}

@@ -23,11 +23,15 @@ import saveVocabRoute from "./routes/saveVocab.js";
 import getVocabsRoute from "./routes/getVocabs.js";
 import deleteVocabRoute from "./routes/deleteVocab.js";
 import updateVocabRoute from "./routes/updateVocab.js";
+import generateBatchRoute from "./routes/generateBatch.js";
+import logoutRoute from "./routes/logout.js";
 
 app.use("/api/vocabs", saveVocabRoute);
 app.use("/api/vocabs", getVocabsRoute);
 app.use("/api/vocabs", deleteVocabRoute);
 app.use("/api/vocabs", updateVocabRoute);
+app.use("/api/vocabs", generateBatchRoute);
+app.use("/api/auth", logoutRoute);
 
 
 app.use(express.static(path.join(__dirname, "../public")));
