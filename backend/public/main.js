@@ -1,4 +1,4 @@
-// frontend/main.js
+// backend/public/main.js
 
 let editId = null;
 
@@ -117,8 +117,7 @@ async function loadVocabs() {
       tbody.appendChild(row);
     });
   } catch (err) {
-    console.error(err);
-    alert("Failed to load data");
+    console.error("Load err:", err);
   }
 }
 
@@ -136,10 +135,10 @@ async function deleteVocab(id) {
 async function generateMeanings() {
   const btn = document.getElementById("generateBtn");
 
-  if (btn,disabled) return;
+  if (btn.disabled) return;
 
   btn.disabled = true;
-  btn.innertext = "Generating...";
+  btn.innerText = "Generating...";
 
   try {
     const res = await fetch(`${API_URL}/vocabs/generate`, {
@@ -159,11 +158,11 @@ async function generateMeanings() {
   btn.innerText = "Generate Meanings";
 }
 
-async function logout() {
-  await fetch(`${API_URL}/auth/logout`, {
-    method: "POST"
-  });
+function logout() {
+  // await fetch(`${API_URL}/auth/logout`, {
+  //  method: "POST"
+  // });
 
-  window.location.href = "/login.html"
+  window.location.href = "/.auth/logout?post_logout_redirect_uri=/";
 }
 loadVocabs();
