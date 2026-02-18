@@ -17,8 +17,10 @@ router.post("/generate", async (req, res) => {
 
         const pool = await connectDB();
 
-        const [rows] = await pool.request().query(
-            `SELECT TOP 10 learning_item_id AS id, title FROM dbo.LearningItem WHERE content IS NULL`
+        const { recordset: rows } = await pool.request().query(
+            `SELECT TOP 10 learning_item_id AS id, title
+            FROM dbo.LearningItem
+            WHERE content IS NULL`
         );
 
         if (rows.length === 0) {
