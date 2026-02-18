@@ -1,4 +1,5 @@
 import express from "express";
+import sql from "mssql";
 import { analyzeBatch } from  "../services/gemini.service.js";
 import { connectDB } from "../db.Config.js";
 
@@ -14,10 +15,10 @@ router.post("/generate", async (req, res) => {
     try {
         isGenerating = true;
 
-        const db = await connectDB();
+        const pool = await connectDB();
 
-        const [rows] = await db.query(
-            "SELECT TOP 10 id, title FROM vocabs WHERE contents IS NULL OR content = ''"
+        const [rows] = await pool.request().query(
+            `SELECT TOP 10 learning_item_id AS id, title FROM dbo.LearningItem WHERE content IS NULL`
         );
 
         if (rows.length === 0) {
@@ -29,10 +30,16 @@ router.post("/generate", async (req, res) => {
         const parsed = JSON.parse(aiText);
 
         for (const item of parsed) {
-            await db.query(
-                "UPDATE vocabs SET content = ? WHERE title = ?",
-                [item.meaning, item.title]
-            );
+            const original = rows.find(r => r.title === item.title);
+            if(!original)   continue;
+            await pool.request()
+                .input("id", sql.Int, original.id)
+                .input("content", sql.NVarChar, item.meaning)
+                .query(`
+                    UPDATE dbo.LearningItem
+                    SET content = @content
+                    WHERE learning_item_id = @id"
+                `);
         }
 
         res.json({ message: "Generated successfully" });
