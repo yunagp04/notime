@@ -17,7 +17,7 @@ router.post("/generate", async (req, res) => {
         const db = await connectDB();
 
         const [rows] = await db.query(
-            "SELECT id, title FROM vocabs WHERE contents IS NULL OR content = '' LIMIT 30"
+            "SELECT TOP 10 id, title FROM vocabs WHERE contents IS NULL OR content = ''"
         );
 
         if (rows.length === 0) {
