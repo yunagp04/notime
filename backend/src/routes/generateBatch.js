@@ -35,7 +35,7 @@ router.post("/generate", async (req, res) => {
             const original = rows.find(r => r.title === item.title);
             if(!original)   continue;
             await pool.request()
-                .input("id", sql.Int, original.id)
+                .input("id", sql.UniqueIdentifier, original.id)
                 .input("content", sql.NVarChar, item.meaning)
                 .query(`
                     UPDATE dbo.LearningItem
