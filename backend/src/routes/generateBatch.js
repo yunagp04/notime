@@ -40,7 +40,7 @@ router.post("/generate", async (req, res) => {
                 .query(`
                     UPDATE dbo.LearningItem
                     SET content = @content
-                    WHERE learning_item_id = @id"
+                    WHERE learning_item_id = @id
                 `);
         }
 
