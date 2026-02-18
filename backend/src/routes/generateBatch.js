@@ -1,6 +1,6 @@
 import express from "express";
 import { analyzeBatch } from  "../services/gemini.service.js";
-import db from "../db.js";
+import { connectDB } from "../db.Config.js";
 
 const router = express.Router();
 
@@ -13,6 +13,8 @@ router.post("/generate", async (req, res) => {
 
     try {
         isGenerating = true;
+
+        const db = await connectDB();
 
         const [rows] = await db.query(
             "SELECT id, title FROM vocabs WHERE contents IS NULL OR content = '' LIMIT 30"
