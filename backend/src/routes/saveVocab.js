@@ -16,9 +16,9 @@ router.post("/", async (req, res) => {
 
     const { title, content, language, metadata } = req.body;
 
-    if (!title || !content) {
+    if (!title) {
       return res.status(400).json({
-        error: "title และ content จำเป็นต้องมี",
+        error: "title จำเป็นต้องมี",
       });
     }
 
@@ -29,7 +29,7 @@ router.post("/", async (req, res) => {
       .input("user_id", sql.NVarChar, userId)
       .input("item_type", sql.NVarChar, "vocabulary")
       .input("title", sql.NVarChar, title)
-      .input("content", sql.NVarChar, content)
+      .input("content", sql.NVarChar, content || null)
       .input("language", sql.NVarChar, language || "en")
       .input("metadata", sql.NVarChar, metadata || null)
       .query(`
