@@ -17,14 +17,18 @@ router.put("/:id", async (req, res) => {
     }
 
     const userId =
-      req.headers["x-ms-client-principal-id"] || "local-test-user";
+      req.headers["x-ms-client-principal-id"] || "11111111-1111-1111-1111-111111111111";
+
+    if (!userId) {
+      return res.status(401).json({ error: "Unauthorized" });
+    }
 
     const pool = await connectDB();
 
     const result = await pool
       .request()
       .input("id", sql.UniqueIdentifier, id)
-      .input("user_id", sql.NVarChar, userId)
+      .input("user_id", sql.UniqueIdentifier, userId)
       .input("title", sql.NVarChar, title)
       .input("content", sql.NVarChar, content)
       .query(`

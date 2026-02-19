@@ -12,7 +12,11 @@ router.post("/", async (req, res) => {
 
   try {
     const userId =
-      req.headers["x-ms-client-principal-id"] || "local-test-user";
+      req.headers["x-ms-client-principal-id"] || "11111111-1111-1111-1111-111111111111";
+
+    if (!userId) {
+      return res.status(401).json({ error: "Unauthorized" });
+    }
 
     const { title, content, language, metadata } = req.body;
 
@@ -25,27 +29,34 @@ router.post("/", async (req, res) => {
     const pool = await connectDB();
 
     const result = await pool
-      .request()
-      .input("user_id", sql.NVarChar, userId)
-      .input("item_type", sql.NVarChar, "vocabulary")
-      .input("title", sql.NVarChar, title)
-      .input("content", sql.NVarChar, content || null)
-      .input("language", sql.NVarChar, language || "en")
-      .input("metadata", sql.NVarChar, metadata || null)
-      .query(`
-        DECLARE @newId UNIQUEIDENTIFIER = NEWID();
+  .request()
+  .input("user_id", sql.UniqueIdentifier, userId)
+  .input("item_type", sql.NVarChar, "vocabulary")
+  .input("title", sql.NVarChar, title)
+  .input("content", sql.NVarChar, content || null)
+  .input("language", sql.NVarChar, language || "en")
+  .input("metadata", sql.NVarChar, metadata || null)
+  .query(`
+    DECLARE @newId UNIQUEIDENTIFIER = NEWID();
 
-        INSERT INTO dbo.LearningItem (
-            learning_item_id, user_id, item_type, title, content,
-            language, metadata, created_at, updated_at
-        )
-        VALUES (
-            @newId, @user_id, @item_type, @title, @content,
-            @language, @metadata, GETUTCDATE(), GETUTCDATE()
-        );
+    INSERT INTO dbo.LearningItem (
+        learning_item_id, item_type, title, content,
+        language, metadata, created_at, updated_at
+    )
+    VALUES (
+        @newId, @item_type, @title, @content,
+        @language, @metadata, GETUTCDATE(), GETUTCDATE()
+    );
 
-        SELECT @newId AS id;
-      `);
+    INSERT INTO dbo.UserLearningItem (
+        user_id, learning_item_id, role, created_at
+    )
+    VALUES (
+        @user_id, @newId, 'owner', GETUTCDATE()
+    );
+
+    SELECT @newId AS id;
+  `);
 
     res.status(201).json({
       message: "บันทึกสำเร็จ!",
