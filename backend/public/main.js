@@ -97,12 +97,14 @@ async function loadVocabs() {
       const actionCell = document.createElement("td");
 
       const editBtn = document.createElement("button");
-      editBtn.textContent = "✏️";
+      editBtn.textContent = "Edit";
+      editBtn.classList.add("action-btn", "edit-btn");
       editBtn.onclick = () =>
         editVocab(v.id, v.title, v.content);
 
       const deleteBtn = document.createElement("button");
-      deleteBtn.textContent = "🗑️";
+      deleteBtn.textContent = "Delete";
+      deleteBtn.classList.add("action-btn", "delete-btn");
       deleteBtn.onclick = () =>
         deleteVocab(v.id);
 

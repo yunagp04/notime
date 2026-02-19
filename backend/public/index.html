@@ -1,4 +1,4 @@
-// frontend/index.html
+<!-- backend/public/index.html -->
 
 <!DOCTYPE html>
 <html lang="en">
@@ -7,77 +7,56 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Vocabulary Memo</title>
 
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      max-width: 700px;
-      margin: 40px auto;
-      padding: 20px;
-    }
-
-    input {
-      width: 100%;
-      padding: 8px;
-      margin-bottom: 10px;
-    }
-
-    button {
-      padding: 8px 16px;
-      cursor: pointer;
-    }
-
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      margin-top: 20px;
-    }
-
-    th, td {
-      padding: 8px;
-      text-align: left;
-    }
-
-    th {
-      background-color: #f2f2f2;
-    }
-  </style>
+  <link rel="stylesheet" href="style.css" />
 </head>
 <body>
 
-  <h2>Add Vocabulary</h2>
+  <h1>Vocabulary Memo</h1>
 
-  <form id="vocabForm">
-    <label for="title">Word</label>
-    <input type="text" id="title" placeholder="Vocabulary" required />
+  <section>
+    <h2>Add Vocabulary</h2>
 
-    <label for="content">Meaning (optional)</label>
-    <input type="text" id="content" placeholder="Meaning" />
+    <form id="vocabForm" class="form-grid" onsubmit="return false;">
+      
+      <label for="title">Word</label>
+      <input type="text" id="title" required />
 
-    <button type="submit" id="saveButton">Save</button>
-  </form>
+      <label for="content">Meaning</label>
+      <input type="text" id="content" />
 
-  <p id="result"></p>
+      <div></div>
+      <button type="button" id="saveButton">Save</button>
 
-  <h3>Vocabulary List</h3>
+    </form>
 
-  <table>
-    <thead>
-      <tr>
-        <th>Word</th>
-        <th>Content</th>
-        <th>Language</th>
-        <th>Action</th>
-      </tr>
-    </thead>
-    <tbody id="vocabTableBody"></tbody>
-  </table>
+    <p id="result"></p>
+  </section>
 
-  <button onclick="logout()">Logout</button>
-  <button id="generateBtn" onclick="generateMeanings()">
-    Generate Meanings
-  </button>
+  <section>
+    <div class="list-header">
+      <h3>Vocabulary List</h3>
+      <button id="generateBtn" onclick="generateMeanings()">
+        Generate Meanings
+      </button>
+    </div>
+
+    <table>
+      <thead>
+        <tr>
+          <th>Word</th>
+          <th>Meaning</th>
+          <th>Language</th>
+          <th>Action</th>
+        </tr>
+      </thead>
+      <tbody id="vocabTableBody"></tbody>
+    </table>
+  </section>
+
+  <div style="margin-top:40px;">
+    <button onclick="logout()">Logout</button>
+  </div>
 
   <script src="main.js"></script>
-
 </body>
 </html>
