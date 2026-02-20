@@ -31,7 +31,7 @@ router.post("/", async (req, res) => {
     const realUserId = await getUserIdFromProvider(pool, providerId);
 
     console.log("realUserId:", realUserId);
-console.log("type:", typeof realUserId);
+    console.log("type:", typeof realUserId);
 
     const result = await pool
       .request()
