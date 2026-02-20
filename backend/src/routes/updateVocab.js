@@ -3,7 +3,7 @@
 import express from "express";
 import sql from "mssql";
 import { connectDB } from "../db.Config.js";
-
+import getUserIdFromProvider from "../utils/getUserIdFromProvider.js";
 
 const router = express.Router();
 
@@ -16,28 +16,33 @@ router.put("/:id", async (req, res) => {
       return res.status(400).json({ error: "Missing id" });
     }
 
-    const userId =
-      req.headers["x-ms-client-principal-id"] || "11111111-1111-1111-1111-111111111111";
+    const providerId = req.headers["x-ms-client-principal-id"]  ||
+                       process.env.DEV_PROVIDER_ID;
 
-    if (!userId) {
+    if (!providerId) {
       return res.status(401).json({ error: "Unauthorized" });
     }
 
     const pool = await connectDB();
 
+    const realUserId = await getUserIdFromProvider(pool, providerId);
+
     const result = await pool
       .request()
       .input("id", sql.UniqueIdentifier, id)
-      .input("user_id", sql.UniqueIdentifier, userId)
+      .input("user_id", sql.UniqueIdentifier, realUserId)
       .input("title", sql.NVarChar, title)
       .input("content", sql.NVarChar, content)
       .query(`
-        UPDATE dbo.LearningItem
-        SET title = @title,
-            content = @content,
-            updated_at = GETUTCDATE()
-        WHERE learning_item_id = @id
-        AND user_id = @user_id
+        UPDATE li
+        SET li.title = @title,
+            li.content = @content,
+            li.updated_at = GETUTCDATE()
+        FROM dbo.LearningItem li
+        INNER JOIN dbo.UserLearningItem uli
+            ON li.learning_item_id = uli.learning_item_id
+        WHERE li.learning_item_id = @id
+        AND uli.user_id = @user_id
       `);
 
     if (result.rowsAffected[0] === 0) {
@@ -49,13 +54,12 @@ router.put("/:id", async (req, res) => {
     res.status(200).json({
       message: "อัปเดตสำเร็จ!",
     });
+
   } catch (error) {
     console.error("UPDATE ERROR:", error);
     res.status(500).json({
       error: error.message,
     });
-  // } finally {
-  //   await sql.close();
   }
 });
 

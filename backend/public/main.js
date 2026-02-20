@@ -127,7 +127,7 @@ async function deleteVocab(id) {
   if (!confirm("Delete this item?")) return;
 
   await fetch(`${API_URL}/vocabs/${id}`, {
-    method: "DELETE",
+    method: "DELETE"
     // credentials: "include",
   });
 
@@ -144,7 +144,8 @@ async function generateMeanings() {
 
   try {
     const res = await fetch(`${API_URL}/vocabs/generate`, {
-      method: "POST"
+      method: "POST",
+      headers: { "Content-Type": "application/json" }
     });
 
     const data = await res.json();
