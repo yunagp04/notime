@@ -16,12 +16,13 @@ async function getUserIdFromProvider(pool, providerUserId) {
 
   const newUserId = crypto.randomUUID();
 
-  await pool.request()
+  await pool
+    .request()
     .input("user_id", sql.UniqueIdentifier, newUserId)
-    .input("providerId", sql.NVarChar, providerId)
+    .input("provider_user_id", sql.NVarChar, providerUserId)
     .query(`
-      INSERT INTO UserAuth (user_id, provider_user_id, created_at)
-      VALUES (@user_id, @providerId, GETUTCDATE())
+      INSERT INTO dbo.UserAuthProvider (user_id, provider_user_id, created_at)
+      VALUES (@user_id, @provider_user_id, GETUTCDATE())
     `);
 
   return newUserId;
