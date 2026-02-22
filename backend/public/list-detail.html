@@ -1,0 +1,160 @@
+<!--backend/public/list-detail.html-->
+
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <title>Manage Words</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <button onclick="location.href='/'">← Back to Lists</button>
+    <h2 id="listTitle">Loading List...</h2>
+
+    <section class="add-section">
+    <input type="text" id="newWord" placeholder="Word">
+    <input type="text" id="newMeaning" placeholder="Meaning">
+    <button onclick="addWordToCurrentList()">Add Word</button>
+</section>
+
+<div class="actions">
+    <button onclick="generateMeanings()" id="genBtn">AI Generate All</button>
+    <button onclick="deleteSelected()" class="btn-danger">Delete Selected</button>
+</div>
+
+<table>
+    <thead>
+        <tr>
+            <th><input type="checkbox" id="selectAll" onchange="toggleAllCheckboxes(this)"></th>
+            <th>Word</th>
+            <th>Meaning</th>
+            <th>Action</th>
+        </tr>
+    </thead>
+    <tbody id="wordContainer"></tbody>
+</table>
+
+    <script src="js/listDetail.js"></script>
+</body>
+</html>
+
+<!-- <!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Word List Detail</title>
+  <link rel="stylesheet" href="style.css" />
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      padding: 20px;
+      max-width: 1000px;
+      margin: 0 auto;
+    }
+    h2 {
+      color: #333;
+    }
+    .action-buttons {
+      margin: 20px 0;
+    }
+    .action-buttons button {
+      padding: 10px 20px;
+      margin-right: 10px;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      font-size: 14px;
+    }
+    .delete-btn {
+      background-color: #f44336;
+      color: white;
+    }
+    .delete-btn:hover {
+      background-color: #da190b;
+    }
+    .back-btn {
+      background-color: #2196F3;
+      color: white;
+    }
+    .back-btn:hover {
+      background-color: #0b7dda;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 20px 0;
+    }
+    table thead {
+      background-color: #f5f5f5;
+    }
+    table th, table td {
+      border: 1px solid #ddd;
+      padding: 12px;
+      text-align: left;
+    }
+    table tbody tr:hover {
+      background-color: #f9f9f9;
+    }
+    .add-word-section {
+      background-color: #e8f5e9;
+      padding: 15px;
+      border-radius: 5px;
+      margin: 20px 0;
+    }
+    .add-word-section input {
+      padding: 8px;
+      margin-right: 10px;
+      border: 1px solid #4CAF50;
+      border-radius: 3px;
+      width: 200px;
+    }
+    .add-word-section button {
+      padding: 8px 15px;
+      background-color: #4CAF50;
+      color: white;
+      border: none;
+      border-radius: 3px;
+      cursor: pointer;
+    }
+    .add-word-section button:hover {
+      background-color: #45a049;
+    }
+  </style>
+</head>
+<body>
+  <h2 id="listTitle">Word List</h2>
+
+  <div class="add-word-section">
+    <h3>Add New Word to This List</h3>
+    <input type="text" id="newWordTitle" placeholder="Word" />
+    <input type="text" id="newWordContent" placeholder="Meaning" />
+    <button onclick="addWordToCurrentList()">Add Word</button>
+  </div>
+
+  <div class="action-buttons">
+    <button class="delete-btn" onclick="deleteSelected()">🗑️ Delete Selected</button>
+    <button class="back-btn" onclick="goBackToLists()">← Back to Lists</button>
+  </div>
+
+  <table>
+    <thead>
+      <tr>
+        <th style="width: 50px;">
+          <input type="checkbox" id="selectAll" onchange="toggleAllCheckboxes(this)">
+        </th>
+        <th>Word</th>
+        <th>Meaning</th>
+        <th style="width: 100px;">Language</th>
+      </tr>
+    </thead>
+    <tbody id="wordContainer"></tbody>
+  </table>
+
+  <div class="action-buttons">
+    <button class="back-btn" onclick="goBackToLists()">← Back to Lists</button>
+  </div>
+
+  <script src="js/listDetail.js"></script>
+</body>
+</html> -->

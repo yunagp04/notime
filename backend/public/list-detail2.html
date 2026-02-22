@@ -1,0 +1,75 @@
+<!-- backend/public/index.html -->
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Vocabulary Memo</title>
+
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+  <h1>Vocabulary Memo</h1>
+
+  <section>
+    <h2>Add Vocabulary</h2>
+
+    <form id="vocabForm" class="form-grid" onsubmit="return false;">
+      
+      <label for="title">Word</label>
+      <input type="text" id="title" required />
+
+      <label for="content">Meaning</label>
+      <input type="text" id="content" />
+
+      <div></div>
+      <button type="button" id="saveButton">Save</button>
+
+    </form>
+
+    <p id="result"></p>
+  </section>
+
+  <section class="add-section">
+  <h3>Add Word to this List</h3>
+  <form id="vocabForm" onsubmit="return false;">
+    <input type="text" id="title" placeholder="Word" required>
+    <input type="text" id="content" placeholder="Meaning">
+    <button type="button" id="saveButton">Add Word</button>
+  </form>
+</section>
+
+<section class="action-bar">
+  <button onclick="generateMeanings()" id="generateBtn">AI Generate Meanings</button>
+  <button onclick="deleteSelected()" class="delete-btn">Delete Selected</button>
+</section>
+
+<table id="vocabTable">
+  <thead>
+    <tr>
+      <th><input type="checkbox" id="selectAll"></th>
+      <th>Word</th>
+      <th>Meaning</th>
+      <th>Actions</th>
+    </tr>
+  </thead>
+  <tbody id="wordContainer"></tbody>
+</table>
+  </section>
+  <button onclick="goToMyList()">Go to My Lists</button>
+
+  <script>
+  function goToMyList() {
+    window.location.href = "/myList.html";
+  }
+  </script>
+
+  <div style="margin-top:40px;">
+    <button onclick="logout()">Logout</button>
+  </div>
+
+  <script src="main.js"></script>
+</body>
+</html>
