@@ -4,8 +4,8 @@ import { GoogleGenerativeAI } from "@google/generative-ai";
 export async function analyzeVocab(word) {
     const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
     const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
-    // const result = await model.generateContent(`Generate brief English meanings for ${word} less than 10 words plain text only.`);
-    const result = await model.generateContent(`I am doing seminar about NLP pitch accent. Please explain me in easy word to understand the meaning of ${word}. (max 3 sentences, 45 words), in English and translate to Thai.`);
+    const result = await model.generateContent(`Generate brief English meanings for ${word} less than 10 words plain text only.`);
+    
     return result.response.text();
 }
 
