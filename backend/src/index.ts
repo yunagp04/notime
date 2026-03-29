@@ -2,6 +2,7 @@ import express from 'express';
 import cors from 'cors';
 import vocabRoutes from './routes/vocabRoutes';
 import path from 'path';
+import fs from 'fs';
 
 const app = express();
 const port = process.env.PORT || 5000;
@@ -17,14 +18,35 @@ app.use((err: any, req: any, res: any, next: any) => {
     next();
 });
 
+console.log('📍 Current Working Directory (cwd):', process.cwd());
+console.log('📍 __dirname:', __dirname);
+
 // Routes
 app.use('/api/vocab', vocabRoutes);
 
-const frontendPath = path.join(__dirname, '../../frontend/build');
+let frontendPath = path.join(__dirname, '../../frontend/build');
+if (!fs.existsSync(frontendPath)) {
+    frontendPath = path.join(process.cwd(), 'frontend/build');
+}
+
+if (!fs.existsSync(frontendPath)) {
+    console.log('⚠️ Warning: frontend/build not found at primary paths. checking root...');
+    const files = fs.readdirSync(process.cwd());
+    console.log('📂 Files in root:', files); 
+}
+
+console.log('📂 Serving Frontend from:', frontendPath);
+
 app.use(express.static(frontendPath));
 
 app.get(/^(?!\/api).+/, (req, res) => {
-    res.sendFile(path.join(frontendPath, 'index.html'));
+    // res.sendFile(path.join(frontendPath, 'index.html'));
+    const indexPath = path.join(frontendPath, 'index.html');
+    if (fs.existsSync(indexPath)) {
+        res.sendFile(indexPath);
+    } else {
+        res.status(404).send(`Error: หาไฟล์ index.html ไม่เจอที่ ${indexPath}`);
+    }
 });
 
 app.listen(port, () => {
