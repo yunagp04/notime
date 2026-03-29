@@ -27,19 +27,28 @@ jobs:
         run: |
           cd frontend
           npm install
-          npm run build --if-present
+          npm run build
 
       - name: Install and Build Backend
         run: |
           cd backend
           npm install
-          npm run build --if-present
+          npm run build
+
+      - name: Clean up node_modules before upload (Optional but Recommended)
+        run: |
+          rm -rf frontend/node_modules
+          
 
       - name: Upload artifact for deployment job
         uses: actions/upload-artifact@v4
         with:
           name: node-app
-          path: .
+          path: |
+            - backend/dist
+            - backend/package.json
+            - backend/node_modules
+            - frontend/build
 
   deploy:
     runs-on: ubuntu-latest
