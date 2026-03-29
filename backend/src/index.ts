@@ -1,6 +1,7 @@
 import express from 'express';
 import cors from 'cors';
 import vocabRoutes from './routes/vocabRoutes';
+import path from 'path';
 
 const app = express();
 const port = process.env.PORT || 5000;
@@ -18,6 +19,13 @@ app.use((err: any, req: any, res: any, next: any) => {
 
 // Routes
 app.use('/api/vocab', vocabRoutes);
+
+const frontendPath = path.join(__dirname, '../../frontend/build');
+app.use(express.static(frontendPath));
+
+app.get(/^(?!\/api).+/, (req, res) => {
+    res.sendFile(path.join(frontendPath, 'index.html'));
+});
 
 app.listen(port, () => {
     console.log(`Server is running at http://localhost:${port}`);

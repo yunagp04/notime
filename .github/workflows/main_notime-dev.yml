@@ -23,6 +23,12 @@ jobs:
         with:
           node-version: '22.x'
 
+      - name: Build Frontend
+        run: |
+          cd frontend
+          npm install
+          npm run build --if-present
+
       - name: Install and Build Backend
         run: |
           cd backend
@@ -33,7 +39,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: node-app
-          path: ./backend
+          path: .
 
   deploy:
     runs-on: ubuntu-latest
