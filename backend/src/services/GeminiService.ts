@@ -1,0 +1,68 @@
+import { GoogleGenerativeAI } from "@google/generative-ai";
+import { IAIService } from "../interfaces/IAIService";
+
+export class GeminiService implements IAIService {
+    private genAI: GoogleGenerativeAI;
+    private model: any;
+    private embeddingModel: any;
+
+    constructor() {
+        // ดึง API Key จาก .env
+        const apiKey = process.env.GEMINI_API_KEY || "";
+        this.genAI = new GoogleGenerativeAI(apiKey);
+
+        // ใช้รุ่น Gemini 2 Flash สำหรับการประมวลผลข้อความ (เร็วและประหยัด)
+        this.model = this.genAI.getGenerativeModel({ 
+            model: "gemini-2.0-flash" 
+        });
+
+        // ใช้รุ่น Embedding 2 สำหรับสร้าง Vector (เพื่อใช้ในระบบค้นหาคำที่ใกล้เคียง)
+        this.embeddingModel = this.genAI.getGenerativeModel({ 
+            model: "gemini-embedding-001" 
+        });
+    }
+
+    /**
+     * ดึงคำแปลและนิยามสั้นๆ จาก Gemini
+     */
+    async getDefinition(word: string): Promise<string> {
+        try {
+            const prompt = `Translate the vocabulary "${word}" to Thai, provide a short definition. (Return only the result in Thai, no formatting)`;
+            const result = await this.model.generateContent(prompt);
+            const response = await result.response;
+            return response.text().trim();
+        } catch (error: any) {
+            console.error("Gemini SDK Error (Definition):", error.message);
+            return "ไม่สามารถดึงข้อมูลได้ในขณะนี้";
+        }
+    }
+
+    /**
+     * สร้าง Embedding Vector ขนาด 768 มิติ
+     */
+    async generateEmbedding(text: string): Promise<number[]> {
+        try {
+            // เรียกใช้ embedContent ผ่านรุ่น Embedding 2
+            const result = await this.embeddingModel.embedContent(text);
+            return result.embedding.values;
+        } catch (error: any) {
+            console.error("Gemini SDK Error (Embedding):", error.message);
+            // คืนค่า Array ว่างขนาด 768 ในกรณีที่ Error
+            return new Array(768).fill(0);
+        }
+    }
+
+    /**
+     * เรียกใช้ AI สำหรับ Prompt ทั่วไป
+     */
+    async callAI(prompt: string): Promise<string> {
+        try {
+            const result = await this.model.generateContent(prompt);
+            const response = await result.response;
+            return response.text();
+        } catch (error: any) {
+            console.error("Gemini CallAI Error:", error.message);
+            return "AI Error";
+        }
+    }
+}
