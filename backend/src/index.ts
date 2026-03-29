@@ -10,6 +10,7 @@ const port = process.env.PORT || 5000;
 //Middleware
 app.use(cors());
 app.use(express.json());
+
 app.use((err: any, req: any, res: any, next: any) => {
     if (err instanceof SyntaxError && 'body' in err) {
         console.error("❌ Bad JSON Format:", err.message);
@@ -18,19 +19,17 @@ app.use((err: any, req: any, res: any, next: any) => {
     next();
 });
 
-console.log('📍 Current Working Directory (cwd):', process.cwd());
-console.log('📍 __dirname:', __dirname);
-
 // Routes
 app.use('/api/vocab', vocabRoutes);
 
-let frontendPath = path.join(process.cwd(), 'public');
+let frontendPath = path.join(process.cwd(), 'frontend/build');
+
 if (!fs.existsSync(path.join(frontendPath, 'index.html'))) {
     frontendPath = path.join(__dirname, '../../frontend/build');
 }
 
+console.log('📍 Current Working Directory (cwd):', process.cwd());
 console.log('📂 Serving Frontend from:', frontendPath);
-
 
 app.use(express.static(frontendPath));
 
@@ -45,7 +44,15 @@ app.get(/^(?!\/api).+/, (req, res) => {
 });
 
 app.listen(port, () => {
-    console.log(`Server is running at http://localhost:${port}`);
+    // 🌐 เช็คว่าเป็น Azure หรือ Local
+    const isAzure = process.env.WEBSITE_HOSTNAME ? true : false;
+    const displayUrl = isAzure 
+        ? `https://${process.env.WEBSITE_HOSTNAME}` 
+        : `http://localhost:${port}`;
+
+    console.log(`🚀 Server is flying!`);
+    console.log(`📍 Environment: ${isAzure ? 'Azure Cloud' : 'Local Machine'}`);
+    console.log(`🔗 URL: ${displayUrl}`);
 });
 
 process.on('unhandledRejection', (reason, promise) => {
