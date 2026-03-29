@@ -1,44 +1,67 @@
 {
-  // Visit https://aka.ms/tsconfig to read more about this file
   "compilerOptions": {
-    // File Layout
-    // "rootDir": "./src",
-    // "outDir": "./dist",
+    /* 🚩 1. กำหนดทางเข้าและทางออกของไฟล์ */
+    "rootDir": "./src",        // บอก TS ว่าโค้ดอยู่ที่ไหน
+    "outDir": "./dist",       // บอก TS ว่าคอมไพล์เสร็จให้เอาไฟล์ไปไว้ที่นี่
 
-    // Environment Settings
-    // See also https://aka.ms/tsconfig/module
-    "module": "nodenext",
-    "target": "esnext",
-    "types": [],
-    // For nodejs:
-    // "lib": ["esnext"],
-    // "types": ["node"],
-    // and npm install -D @types/node
+    /* 🚩 2. การตั้งค่าโมดูล (แนะนำให้ใช้ค่านี้สำหรับ Node.js ปัจจุบัน) */
+    "module": "NodeNext",
+    "moduleResolution": "NodeNext",
+    "target": "ESNext",
+    
+    /* 🚩 3. Library และ Types ที่จำเป็น */
+    "lib": ["ESNext"],
+    "types": ["node"],        // สำคัญ: เพื่อให้ใช้ __dirname หรือ process ได้
 
-    // Other Outputs
+    /* อื่นๆ คงไว้ตามเดิม */
     "sourceMap": true,
     "declaration": true,
-    "declarationMap": true,
-
-    // Stricter Typechecking Options
-    "noUncheckedIndexedAccess": true,
-    "exactOptionalPropertyTypes": true,
-
-    // Style Options
-    // "noImplicitReturns": true,
-    // "noImplicitOverride": true,
-    // "noUnusedLocals": true,
-    // "noUnusedParameters": true,
-    // "noFallthroughCasesInSwitch": true,
-    // "noPropertyAccessFromIndexSignature": true,
-
-    // Recommended Options
     "strict": true,
     "jsx": "react-jsx",
-    "verbatimModuleSyntax": false,
-    "isolatedModules": true,
-    "noUncheckedSideEffectImports": true,
-    "moduleDetection": "force",
     "skipLibCheck": true,
-  }
+    "esModuleInterop": true   // เพิ่มตัวนี้เพื่อให้ Import library บางตัวได้ง่ายขึ้น
+  },
+  "include": ["src/**/*"],    // รวมเฉพาะไฟล์ใน src
+  "exclude": ["node_modules", "**/*.test.ts"] // ไม่เอา node_modules มารวม
+  // // Visit https://aka.ms/tsconfig to read more about this file
+  // "compilerOptions": {
+  //   // File Layout
+  //   "rootDir": "./src",
+  //   "outDir": "./dist",
+
+  //   // Environment Settings
+  //   // See also https://aka.ms/tsconfig/module
+  //   "module": "nodenext",
+  //   "target": "esnext",
+  //   // For nodejs:
+  //   "lib": ["esnext"],
+  //   "types": ["node"],
+  //   // "typeRoots": ["./node_modules/@types"],
+
+  //   // Other Outputs
+  //   "sourceMap": true,
+  //   "declaration": true,
+  //   "declarationMap": true,
+
+  //   // Stricter Typechecking Options
+  //   "noUncheckedIndexedAccess": true,
+  //   "exactOptionalPropertyTypes": true,
+
+  //   // Style Options
+  //   // "noImplicitReturns": true,
+  //   // "noImplicitOverride": true,
+  //   // "noUnusedLocals": true,
+  //   // "noUnusedParameters": true,
+  //   // "noFallthroughCasesInSwitch": true,
+  //   // "noPropertyAccessFromIndexSignature": true,
+
+  //   // Recommended Options
+  //   "strict": true,
+  //   "jsx": "react-jsx",
+  //   "verbatimModuleSyntax": false,
+  //   "isolatedModules": true,
+  //   "noUncheckedSideEffectImports": true,
+  //   "moduleDetection": "force",
+  //   "skipLibCheck": true,
+  // }
 }

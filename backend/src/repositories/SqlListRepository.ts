@@ -1,6 +1,6 @@
 import { IListRepository } from "../interfaces/IListRepository";
 import sql from 'mssql'; // อย่าลืม import mssql นะครับโบร
-import { poolPromise } from '../../config/db';
+import { poolPromise } from '../config/db';
 
 export class SqlListRepository implements IListRepository {
     

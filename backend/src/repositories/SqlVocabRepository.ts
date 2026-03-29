@@ -1,7 +1,7 @@
 import { IVocabRepository } from "../interfaces/IVocabRepository";
 import { LearningItem } from "../models/LearningItem";
 import sql from 'mssql';
-import { poolPromise } from '../../config/db';
+import { poolPromise } from '../config/db';
 import { v4 as uuidv4 } from 'uuid';
 
 export class SqlVocabRepository implements IVocabRepository {
