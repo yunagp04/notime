@@ -24,18 +24,13 @@ console.log('📍 __dirname:', __dirname);
 // Routes
 app.use('/api/vocab', vocabRoutes);
 
-let frontendPath = path.join(__dirname, '../../frontend/build');
-if (!fs.existsSync(frontendPath)) {
-    frontendPath = path.join(process.cwd(), 'frontend/build');
-}
-
-if (!fs.existsSync(frontendPath)) {
-    console.log('⚠️ Warning: frontend/build not found at primary paths. checking root...');
-    const files = fs.readdirSync(process.cwd());
-    console.log('📂 Files in root:', files); 
+let frontendPath = path.join(process.cwd(), 'public');
+if (!fs.existsSync(path.join(frontendPath, 'index.html'))) {
+    frontendPath = path.join(__dirname, '../../frontend/build');
 }
 
 console.log('📂 Serving Frontend from:', frontendPath);
+
 
 app.use(express.static(frontendPath));
 
