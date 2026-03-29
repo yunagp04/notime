@@ -1,22 +1,21 @@
-// backend/src/services/gemini.service.js
+// backend/src/services/ai_engine/gemini.service.js
 import { GoogleGenerativeAI } from "@google/generative-ai";
 
-export async function analyzeVocab(word) {
+export async function analyzeVocabGemini(word) {
     const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
     const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
-    const result = await model.generateContent(`Generate brief English meanings for ${word} less than 10 words plain text only.`);
-    
+    const result = await model.generateContent(`แปลความหมายคำว่า ${word} ให้เหมือนพจนานุกรมโดยเป็นตัวอักษรธรรมดา ไม่มีเครื่องหมายพิเศษ ไม่เกิน 10 คำ`);
     return result.response.text();
 }
 
-export async function analyzeBatch(words) {
+export async function analyzeBatchGemini(words) {
     const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
     const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
 
     const wordList = words.map(w => w.title).join("\n");
 
     const prompt = `
-    Generate brief English meanings for the following words.
+    Generate brief Thai meanings (no reading for meaning) for the following words.
     Return ONLY valid JSON array format like:
 
     [
@@ -37,5 +36,4 @@ export async function analyzeBatch(words) {
         .trim();
 
     return clean;
-
 }

@@ -2,88 +2,31 @@
 <html lang="th">
 <head>
     <meta charset="UTF-8">
-    <title>My Vocabulary Lists</title>
+    <title>คลังคำศัพท์ทั้งหมด</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <h1>📚 My Lists</h1>
-    
-    <div class="quick-add-box" style="background: #e3f2fd; padding: 15px; border-radius: 8px;">
-        <h3>Quick Add to "New Items"</h3>
-        <input type="text" id="quickWord" placeholder="Word">
-        <input type="text" id="quickMeaning" placeholder="Meaning">
-        <button onclick="quickAdd()">Add</button>
-    </div>
+    <h1>My Vocabulary</h1>
+    <button onclick="location.href='/list-all.html'">ไปหน้าจัดการกลุ่มคำ (Lists) →</button>
 
-    <br>
-    <button onclick="createList()" class="btn-primary">+ Create New List</button>
-
-    <div id="listContainer">
-        </div>
-
-    <script src="js/myList.js"></script>
-</body>
-</html>
-
-<!-- backend/public/index.html
-
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Vocabulary Memo</title>
-
-  <link rel="stylesheet" href="style.css" />
-</head>
-<body>
-
-  <h1>Vocabulary Memo</h1>
-
-  <section>
-    <h2>Add Vocabulary</h2>
-
-    <form id="vocabForm" class="form-grid" onsubmit="return false;">
-      
-      <label for="title">Word</label>
-      <input type="text" id="title" required />
-
-      <label for="content">Meaning</label>
-      <input type="text" id="content" />
-
-      <div></div>
-      <button type="button" id="saveButton">Save</button>
-
-    </form>
-
-    <p id="result"></p>
-  </section>
-
-  <section>
-    <div class="list-header">
-      <h3>Vocabulary List</h3>
-      <button id="generateBtn" onclick="generateMeanings()">
-        Generate Meanings
-      </button>
-    </div>
+    <section class="add-section">
+        <h3>เพิ่มคำศัพท์ใหม่ (บันทึกลงคลัง)</h3>
+        <input type="text" id="title" placeholder="คำศัพท์">
+        <input type="text" id="content" placeholder="ความหมาย">
+        <button onclick="saveVocab()">บันทึก</button>
+    </section>
 
     <table>
-      <thead>
-        <tr>
-          <th>Word</th>
-          <th>Meaning</th>
-          <th>Language</th>
-          <th>Action</th>
-        </tr>
-      </thead>
-      <tbody id="vocabTableBody"></tbody>
+        <thead>
+            <tr>
+                <th>คำศัพท์</th>
+                <th>ความหมาย</th>
+                <th>จัดการ</th>
+            </tr>
+        </thead>
+        <tbody id="vocabTableBody"></tbody>
     </table>
-  </section>
 
-  <div style="margin-top:40px;">
-    <button onclick="logout()">Logout</button>
-  </div>
-
-  <script src="main.js"></script>
+    <script src="js/vocab-logic.js"></script>
 </body>
-</html> -->
+</html>

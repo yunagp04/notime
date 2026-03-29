@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <title>กลุ่มคำศัพท์ของฉัน</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <button onclick="location.href='/'">← กลับหน้าคลังคำศัพท์</button>
+    <h1>📋 My Lists</h1>
+    <button onclick="createNewList()">+ สร้างกลุ่มคำใหม่</button>
+
+    <div id="listContainer" class="list-grid"></div>
+
+    <script src="js/list-logic.js"></script>
+</body>
+
+<style>
+    .card-actions {
+        display: flex;
+        gap: 10px;
+        margin-top: 15px;
+        border-top: 1px solid #eee;
+        padding-top: 10px;
+    }
+    .btn-edit { background: #f0f0f0; border: 1px solid #ccc; cursor: pointer; }
+    .btn-delete { background: #ff4444; color: white; border: none; cursor: pointer; }
+</style>
+
+
+</html>

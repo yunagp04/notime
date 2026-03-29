@@ -1,148 +1,263 @@
-/* backend/public/styles.css */
+/* backend/public/style.css */
+
+/* --- ตั้งค่าพื้นฐาน (Global Reset) --- */
+* {
+    box-sizing: border-box; /* ให้ padding ไม่ดันขนาดหลัก */
+    margin: 0;
+    padding: 0;
+    font-family: 'Courier New', Courier, monospace; /* ใช้ Font แนวพิมพ์ดีด ให้ลุคเหลี่ยมๆ ขาวดำ */
+}
 
 body {
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-  max-width: 760px;
-  margin: 60px auto;
-  padding: 0 20px;
-  color: #222;
+    background-color: #ffffff; /* พื้นหลังขาวบริสุทธิ์ */
+    color: #000000; /* ตัวอักษรดำสนิท */
+    line-height: 1.6;
+    padding: 20px;
+    max-width: 1200px; /* จำกัดความกว้างหน้าจอ */
+    margin: 0 auto; /* จัดกึ่งกลางหน้าจอ */
 }
 
-/* HEADINGS */
-h1 {
-  margin-bottom: 40px;
-  font-size: 26px;
+/* --- หัวข้อ (Headings) --- */
+h1, h2, h3 {
+    font-weight: bold;
+    text-transform: uppercase; /* ตัวพิมพ์ใหญ่ทั้งหมด เพิ่มความแข็ง */
+    margin-bottom: 15px;
+    border-bottom: 2px solid #000000; /* เส้นใต้ดำหนา */
+    padding-bottom: 5px;
+    display: inline-block; /* ให้เส้นใต้พอดีคำ */
 }
 
-h2 {
-  margin-bottom: 20px;
-  font-size: 18px;
-}
+h1 { font-size: 2rem; margin-bottom: 30px; display: block; text-align: center;}
+h2 { font-size: 1.5rem; }
+h3 { font-size: 1.2rem; border-bottom: 1px solid #000000;}
 
-/* ==== FORM GRID ==== */
-.form-grid {
-  display: grid;
-  grid-template-columns: 140px 1fr;
-  row-gap: 14px;
-  column-gap: 20px;
-  align-items: center;
-}
-
-.form-grid button {
-  justify-self: start;
-}
-
-
-label {
-  font-size: 14px;
-  color: #555;
-}
-
-input {
-  padding: 8px 6px;
-  border: none;
-  border-bottom: 1px solid #ccc;
-  font-size: 14px;
-}
-
-input:focus {
-  outline: none;
-  border-bottom: 1px solid #000;
-}
-
-/* BUTTON */
+/* --- ปุ่ม (Buttons) --- */
 button {
-  padding: 6px 14px;
-  border: 1px solid #000;
-  background: transparent;
-  cursor: pointer;
-  font-size: 13px;
+    background-color: #000000; /* ปุ่มดำ */
+    color: #ffffff; /* ตัวอักษรขาว */
+    border: 2px solid #000000; /* ขอบดำหนา */
+    padding: 10px 20px;
+    cursor: pointer;
+    font-weight: bold;
+    text-transform: uppercase;
+    transition: all 0.2s ease; /* เพิ่ม Effect ตอนเอาเมาส์ชี้ */
+    margin: 5px;
+    display: inline-block;
 }
 
 button:hover {
-  background: #000;
-  color: #fff;
+    background-color: #ffffff; /* เปลี่ยนเป็นพื้นขาว */
+    color: #000000; /* ตัวอักษรดำ */
 }
 
-/* ==== TABLE ==== */
-
-.list-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin: 50px 0 15px;
+button:disabled {
+    background-color: #cccccc; /* ปุ่มเทาเมื่อกดไม่ได้ */
+    border-color: #cccccc;
+    cursor: not-allowed;
 }
 
+/* ปุ่มอันตราย (เช่น ลบ) */
+button.delete-btn, button[style*="color:red"], button[style*="background-color: #ff4d4d"] {
+    background-color: #ffffff !important;
+    color: #000000 !important;
+    border: 2px dashed #000000 !important; /* ขอบเส้นประดำ */
+}
+
+button.delete-btn:hover, button[style*="color:red"]:hover, button[style*="background-color: #ff4d4d"]:hover {
+    background-color: #000000 !important;
+    color: #ffffff !important;
+}
+
+/* --- ฟอร์มอินพุต (Inputs) --- */
+input[type="text"], input[type="search"], textarea {
+    background-color: #ffffff;
+    color: #000000;
+    border: 2px solid #000000; /* ขอบดำหนา เหลี่ยมเป๊ะ */
+    padding: 10px;
+    width: 100%;
+    margin-bottom: 15px;
+    font-size: 1rem;
+}
+
+input[type="text"]:focus {
+    outline: none;
+    background-color: #f0f0f0; /* เปลี่ยนสีพื้นหลังนิดหน่อยตอนพิมพ์ */
+}
+
+/* จัดการ Layout ของฟอร์ม (Form Grid) */
+.form-grid, .add-section {
+    border: 2px solid #000000; /* กรอบดำล้อมรอบเซกชัน */
+    padding: 20px;
+    margin-bottom: 30px;
+    background-color: #fafafa;
+}
+
+.form-grid input, .add-section input {
+    margin-bottom: 10px; /* ลดระยะห่างอินพุตในฟอร์ม */
+}
+
+/* --- ตาราง (Tables) --- */
 table {
-  width: 100%;
-  border-collapse: collapse;
-  font-size: 14px;
+    width: 100%;
+    border-collapse: collapse; /* ให้เส้นขอบตารางติดกัน */
+    margin-bottom: 30px;
+    border: 2px solid #000000;
+    table-layout: fixed; /* ขอบตารางดำหนา */
+}
+
+th, td {
+    text-align: left;
+    padding: 12px;
+    border: 1px solid #000000; /* เส้นคั่นช่องดำบาง */
 }
 
 th {
-  text-align: left;
-  padding-bottom: 8px;
-  border-bottom: 1px solid #000;
+    background-color: #000000; /* หัวตารางดำ */
+    color: #ffffff; /* ตัวอักษรขาว */
+    text-transform: uppercase;
 }
 
-td {
-  padding: 10px 0;
-  border-bottom: 1px solid #eee;
+tr:nth-child(even) {
+    background-color: #f2f2f2; /* สลับสีแถวเทาอ่อน */
 }
 
-th:nth-child(1),
-td:nth-child(1) {
-  /* width: 25%; */
-  width: 40px;
-  text-align: center;
+tr:hover {
+    background-color: #e0e0e0; /* ไฮไลท์แถวตอนเอาเมาส์ชี้ */
 }
 
-th:nth-child(2),
-td:nth-child(2) {
-  width: 150px;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+/* --- จัดการ Layout อื่นๆ --- */
+.action-bar, .list-header, .actions {
+    display: flex;
+    justify-content: space-between; /* จัดปุ่มซ้าย-ขวา */
+    align-items: center;
+    margin-bottom: 20px;
+    padding: 10px 0;
+    border-bottom: 1px solid #cccccc;
 }
 
-th:nth-child(3),
-td:nth-child(3) {
-  width: auto;
-  word-wrap: break-word;
-  white-space: normal;
-  padding-right: 15px;
+/* จัดการหน้า List All (Grid) */
+.list-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); /* จัดการ Card อัตโนมัติ */
+    gap: 20px;
 }
 
-th:nth-child(4),
-td:nth-child(4) {
-  width: 120px;
-  text-align: right;
+.list-card {
+    border: 2px solid #000000; /* กรอบ Card ดำหนา เหลี่ยมเป๊ะ */
+    padding: 20px;
+    cursor: pointer;
+    background-color: #ffffff;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 
-/* ===== Action Buttons ===== */
+.list-card:hover {
+    transform: translateY(-5px); /* ยกตัวขึ้นนิดหน่อย */
+    box-shadow: 5px 5px 0px #000000; /* เงาเหลี่ยมดำหนา */
+}
 
+.list-card h3 {
+    border-bottom: none; /* ลบเส้นใต้หัวข้อใน Card */
+    margin-bottom: 5px;
+}
+
+/* สไตล์สำหรับคำเตือน หรือ รอ AI */
+em {
+    color: #555555;
+    font-style: normal;
+    text-decoration: underline; /* ขีดเส้นใต้แทนสี */
+}
+
+/* ตกแต่งปุ่มจิ๋วให้ดูเหลี่ยมเท่เข้ากับธีม */
 .action-btn {
-  background: none;
-  border: none;
-  cursor: pointer;
-  font-size: 13px;
-  margin-right: 12px;
-  padding: 0;
-}
-
-.edit-btn {
-  color: #333;
-}
-
-.delete-btn {
-  color: #c0392b;
+    padding: 2px 6px;
+    margin: 0 2px;
+    cursor: pointer;
+    background: white;
+    border: 1px solid black;
+    font-size: 14px;
 }
 
 .action-btn:hover {
-  text-decoration: underline;
+    background: #f0f0f0;
 }
 
-th:last-child,
-td:last-child {
-  text-align: right;
+textarea.edit-input-field {
+    resize: none;
+    min-height: 1.6em;
+    height: auto;
+}
+
+#wordTableBody td {
+    vertical-align: top; /* เปลี่ยนเป็น top เพื่อให้เวลามี textarea แล้วตำแหน่งคงที่ */
+    padding: 10px 8px;
+    position: relative; /* สำหรับจัดตำแหน่งภายใน */
+}
+
+#wordTableBody input {
+    height: 28px;
+    box-sizing: border-box;
+}
+
+/* ปรับแต่ง Input และ Textarea ในโหมดแก้ไขไม่ให้มี margin ส่วนเกิน */
+.edit-input-field {
+    margin: 0 !important; 
+    padding: 4px 8px !important;
+    font-size: 14px !important;
+    width: 100% !important;
+    display: none; /* ซ่อนไว้เป็นค่าเริ่มต้น */
+}
+
+/* สำหรับ Textarea ให้จำกัดความสูงไม่ให้โดดจากแถวมากเกินไป */
+textarea.edit-input-field {
+    min-height: 80px; 
+    resize: vertical;
+}
+
+/* กันการกระตุกเมื่อสลับโหมด */
+.display-text {
+    display: block;
+    word-break: break-word;
+}
+
+/* ===== TABLE COLUMN CONTROL (FINAL CLEAN VERSION) ===== */
+
+table {
+    table-layout: fixed;
+    width: 100%;
+}
+
+th.col-chk, td.col-chk {
+    width: 45px;
+    text-align: center;
+}
+
+th.title-cell, td.title-cell {
+    width: 200px;
+}
+
+th.col-action, td.col-action {
+    width: 120px;
+}
+
+th.content-cell, td.content-cell {
+    width: auto;
+}
+
+
+/* กันข้อความล้น */
+.title-cell,
+.content-cell {
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.col-action {
+    text-align: center;
+}
+
+.action-wrapper {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 6px;
 }
