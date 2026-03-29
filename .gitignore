@@ -1,3 +1,16 @@
-node_modules
+# Dependency folders
+node_modules/
+dist/
+build/
+
+# Local environment variables
 .env
-dist
+.env.local
+
+# IDE settings
+.vscode/
+.idea/
+
+# OS files
+.DS_Store
+Thumbs.db
