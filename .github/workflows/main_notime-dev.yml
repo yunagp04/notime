@@ -44,11 +44,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: node-app
-          path: |
-            - backend/dist
-            - backend/package.json
-            - backend/node_modules
-            - frontend/build
+          path: .
 
   deploy:
     runs-on: ubuntu-latest
