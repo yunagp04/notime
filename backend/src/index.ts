@@ -15,45 +15,48 @@ const port = process.env.PORT || 5000;
 app.use(cors());
 app.use(express.json());
 
-app.use(async (req: any, res: any, next: any) => {
-    // 1. ดึงค่าจาก Azure Header
+app.use(async (req: any, res: any, next) => {
     const userEmail = req.headers['x-ms-client-principal-name']; 
-    const providerId = req.headers['x-ms-client-principal-id']; // Unique ID จาก Google
+    const providerId = req.headers['x-ms-client-principal-id'];
 
     if (userEmail && providerId) {
         try {
-            // 2. ใช้ฟังก์ชันที่มีอยู่แล้วใน Repository ค้นหา User
-            let user = await vocabRepo.getUserByAuthProviderID(providerId);
-
+            // เช็คว่ามีใน DB หรือยัง
+            let user = await vocabRepo.getUserByAuthProviderID(providerId); 
+            
             if (!user) {
-                console.log(`🆕 พบผู้ใช้ใหม่จากเมลมหาลัย: ${userEmail}`);
-                // 3. ถ้าไม่เจอ ให้สั่ง Register ใหม่ทันที
+                // ถ้าไม่เจอ ให้ลงทะเบียนใหม่
                 user = await vocabRepo.registerNewUser({
                     email: userEmail,
                     name: userEmail.split('@')[0],
                     provider: 'google',
                     providerUserId: providerId
                 });
+                console.log(`✨ [Auth] Auto-registered: ${userEmail}`);
             }
-
-            // 4. ฝาก user_id ไว้ใน request เพื่อใช้งานต่อ
-            req.currentUserId = user.user_id;
-            console.log(`👤 Current User ID: ${req.currentUserId}`);
-
+            // ฝาก ID ไว้ใน request
+            req.currentUserId = user.user_id; 
         } catch (err) {
-            console.error("❌ Auto Register Error:", err);
+            console.error("❌ [Auth] Database Error:", err);
         }
     }
     next();
 });
 
-// app.use((err: any, req: any, res: any, next: any) => {
-//     if (err instanceof SyntaxError && 'body' in err) {
-//         console.error("❌ Bad JSON Format:", err.message);
-//         return res.status(400).json({ error: "JSON ส่งมาผิดรูปแบบจ้า" });
-//     }
-//     next();
-// });
+app.use('/api/vocab', (req: any, res, next) => {
+    // ถ้าไม่มี ID (ไม่ได้ล็อกอิน) ให้หยุดตรงนี้เลย
+    if (!req.currentUserId) {
+        return res.status(401).json({ error: "Unauthorized: ไม่พบข้อมูลผู้ใช้" });
+    }
+
+    // ส่ง ID ให้ Repository ใช้งาน
+    req.userId = req.currentUserId; 
+
+    // 🚩 พ่น Log เพื่อดูความเคลื่อนไหวบน Azure
+    console.log(`📡 [API Call] ${req.method} ${req.path} | By User: ${req.userId}`);
+    
+    next();
+}, vocabRoutes);
 
 // Routes
 app.use('/api/vocab', vocabRoutes);
