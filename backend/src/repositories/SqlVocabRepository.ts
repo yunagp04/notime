@@ -318,7 +318,7 @@ export class SqlVocabRepository implements IVocabRepository {
         const pool = await poolPromise;
         const result = await pool.request()
             .input("providerId", sql.NVarChar, providerId)
-            .query("SELECT TOP 1 user_id FROM [UserAuthProvider] WHERE [provider_user_id] = @providerId");
+            .query("SELECT TOP 1 [user_id] FROM [UserAuthProvider] WHERE [provider_user_id] = @providerId");
         return result.recordset[0] || null;
     }
 

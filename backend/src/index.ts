@@ -41,12 +41,17 @@ app.use(async (req: any, res: any, next) => {
                 });
                 console.log(`✨ Auto-registered: ${userEmail}`);
             }
-            // ✅ ฝาก userId ไว้ใน request object เพื่อให้ Controller อื่นๆ เรียกใช้ได้
+                    
+            // ✨ ไม่ว่าเก่าหรือใหม่ ต้องเซต ID ให้ request เอาไปใช้ต่อ
             req.userId = user.user_id; 
+
         } catch (err) {
             console.error("❌ Auth Middleware Error:", err);
+            }
+        } else if (isAzure) {
+            // 🚩 ถ้าอยู่บน Azure แต่ไม่มี Header (ยังไม่ได้ Login) ถึงค่อยไล่ไป 401
+            return res.status(401).json({ error: "Please log in via Azure" });
         }
-    }
     next();
 });
 

@@ -141,7 +141,7 @@ export class VocabController {
 
     async getSummary(req: any, res: Response) {
         try {
-            const { userId } = req.userId;
+            const userId = req.userId;
 
             if (!userId) return res.status(401).json({ error: "Unauthorized" });
 
@@ -158,9 +158,9 @@ export class VocabController {
         }
     }
 
-    async review(req: Request, res: Response) {
-        const { userId, learningItemId, rating, responseTimeMs } = req.body;
-        
+    async review(req: any, res: Response) {
+        const { learningItemId, rating, responseTimeMs } = req.body;
+        const userId = req.userId;
         if (!userId || !learningItemId || rating === undefined) {
             return res.status(400).json({ error: "ข้อมูลไม่ครบถ้วน" });
         }
@@ -202,15 +202,15 @@ export class VocabController {
         }
     }
 
-    async search(req: Request, res: Response) {
+    async search(req: any, res: Response) {
         // 🚩 ต้องดึงจาก req.query เพราะส่งมาทาง URL
         const q = req.query.q as string; 
-        const userId = req.query.userId as string;
+        const userId = req.userId as string;
 
         console.log("🔍 Search Query received:", q); // เช็คใน Terminal ว่าค่าขึ้นไหม
 
-        if (!q) {
-            return res.status(400).json({ error: "กรุณาระบุคำค้นหาใน parameter q" });
+        if (!q || !userId) {
+            return res.status(400).json({ error: "ข้อมูลไม่ครบถ้วน" });
         }
 
         try {

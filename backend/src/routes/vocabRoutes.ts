@@ -46,4 +46,7 @@ router.get("/search", (req, res) => vocabCtrl.search(req, res));   // ค้น�
 router.put("/:id", (req, res) => vocabCtrl.update(req, res));      // อัปเดต
 router.delete("/:id", (req, res) => vocabCtrl.delete(req, res));   // ลบ
 
+router.get("/items", (req, res) => vocabCtrl.getVocabs(req, res)); // เพิ่ม path /items
+router.post("/add", (req, res) => vocabCtrl.create(req, res));     // เพิ่ม path /add ให้ตรงกับ frontend
+
 export default router;

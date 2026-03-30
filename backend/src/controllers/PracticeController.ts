@@ -9,9 +9,8 @@ export class PracticeController {
     ) {}
 
     async getTodayTasks(req: any, res: Response) {
-        // const { userId } = req.query;
         const userId = req.userId;
-        if (!userId) return res.status(400).json({ error: "ระบุ userId" });
+        if (!userId) return res.status(401).json({ error: "Unauthorized" });
 
         try {
             const tasks = await this.session.startSession(userId as string);
@@ -25,7 +24,7 @@ export class PracticeController {
         // const { userId, itemId, rating } = req.body;
         const { itemId, rating } = req.body;
         const userId = req.userId;
-        
+
         try {
             const currentItem = await this.repo.getReviewState(itemId);
             await this.session.submitReview(currentItem, userId, rating);
