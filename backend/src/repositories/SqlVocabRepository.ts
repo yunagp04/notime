@@ -355,15 +355,16 @@ export class SqlVocabRepository implements IVocabRepository {
             await transaction.request()
                 .input("authId", sql.UniqueIdentifier, uuidv4())
                 .input("userId", sql.UniqueIdentifier, userId)
-                .input("provider", sql.NVarChar, authData.provider)
                 .input("puid", sql.NVarChar, authData.providerUserId)
-                .query(`INSERT INTO UserAuthProvider (user_auth_id, user_id, provider_name, provider_user_id, created_at) 
-                        VALUES (@authId, @userId, @provider, @puid, GETDATE())`);
+                .input("puname", sql.NVarChar, authData.name)
+                .query(`INSERT INTO UserAuthProvider (user_auth_id, user_id, provider_user_id, provider_user_name, created_at) 
+                        VALUES (@authId, @userId, @puid, @puname, GETDATE())`);
 
             await transaction.commit();
             return { user_id: userId, ...authData };
         } catch (err) {
             await transaction.rollback();
+            console.error("Register User Failed:", err);
             throw err;
         }
     }
