@@ -40,6 +40,27 @@ export class SqlVocabRepository implements IVocabRepository {
         return result.recordset;
     }
 
+    async getOrCreateDefaultList(userId: string): Promise<string> {
+        const pool = await poolPromise;
+        // 1. ลองหาลิสต์ชื่อ New Item ของ User คนนี้ก่อน
+        const result = await pool.request()
+            .input("userId", sql.UniqueIdentifier, userId)
+            .query(`SELECT list_id FROM UserList WHERE user_id = @userId AND list_name = 'New Item'`);
+
+        if (result.recordset.length > 0) {
+            return result.recordset[0].list_id; // เจอแล้ว ส่ง ID กลับไป
+        }
+
+        // 2. ถ้าไม่เจอ (เช่น User เก่าที่ยังไม่มีลิสต์นี้) ให้สร้างใหม่ให้เขาเลย
+        const newListId = uuidv4();
+        await pool.request()
+            .input("id", sql.UniqueIdentifier, newListId)
+            .input("userId", sql.UniqueIdentifier, userId)
+            .query(`INSERT INTO UserList (list_id, user_id, list_name, created_at) VALUES (@id, @userId, 'New Item', GETDATE())`);
+        
+        return newListId;
+    }
+
     async getDueVocabs(userId: string): Promise<any[]> {
         const pool = await poolPromise;
         const result = await pool.request()
@@ -314,6 +335,7 @@ export class SqlVocabRepository implements IVocabRepository {
     async registerNewUser(authData: any): Promise<any> {
         const pool = await poolPromise;
         const userId = uuidv4();
+        const defaultListId = uuidv4();
         const transaction = new sql.Transaction(pool);
         try {
             await transaction.begin();
@@ -323,6 +345,12 @@ export class SqlVocabRepository implements IVocabRepository {
                 .input("name", sql.NVarChar, authData.name)
                 .query(`INSERT INTO [User] (user_id, email, display_name, created_at, preferred_language) 
                         VALUES (@id, @email, @name, GETDATE(), 'en')`);
+
+            await transaction.request()
+            .input("listId", sql.UniqueIdentifier, defaultListId)
+            .input("userId", sql.UniqueIdentifier, userId)
+            .query(`INSERT INTO UserList (list_id, user_id, list_name, created_at) 
+                    VALUES (@listId, @userId, 'New Words', GETDATE())`);
 
             await transaction.request()
                 .input("authId", sql.UniqueIdentifier, uuidv4())

@@ -1,9 +1,9 @@
-const BASE_URL = "http://localhost:5000/api/vocab";
-const USER_ID = "888f10a9-6345-4a8a-99a1-79984863acf1";
+const BASE_URL = "/api/vocab";
+// const USER_ID = "888f10a9-6345-4a8a-99a1-79984863acf1";
 
 // Fetch all vocabulary lists for the current user
 export const getLists = async () => {
-  const res = await fetch(`${BASE_URL}/lists?userId=${USER_ID}`);
+  const res = await fetch(`${BASE_URL}/lists`);
   if (!res.ok) throw new Error("Failed to fetch vocabulary lists.");
   return res.json();
 };
@@ -11,8 +11,8 @@ export const getLists = async () => {
 // Fetch vocabulary items, optionally filtered by list ID
 export const getVocabs = async (listId?: string) => {
   const url = listId 
-    ? `${BASE_URL}/items?userId=${USER_ID}&listId=${listId}`
-    : `${BASE_URL}/items?userId=${USER_ID}`;
+    ? `${BASE_URL}/items?listId=${listId}`
+    : `${BASE_URL}/items`;
 
   const res = await fetch(url);
   if (!res.ok) throw new Error("Failed to fetch vocabulary items.");
@@ -24,7 +24,7 @@ export const saveNewVocab = async (data: {
   word: string, 
   definition: string, 
   listId: string, 
-  userId: string,
+  userId?: string,
   skipAI: boolean 
 }) => {
   const res = await fetch(`${BASE_URL}/add`, {
@@ -75,21 +75,21 @@ export const generateAIDefinition = async (word: string) => {
 
 // Fetch general dashboard statistics
 export const getDashboardStats = async () => {
-  const response = await fetch(`${BASE_URL}/dashboard?userId=${USER_ID}`);
+  const response = await fetch(`${BASE_URL}/dashboard`);
   if (!response.ok) throw new Error("Failed to fetch dashboard statistics.");
   return response.json();
 };
 
 // Fetch summary metrics including learning progress and history
 export const getSummary = async () => {
-  const response = await fetch(`${BASE_URL}/summary?userId=${USER_ID}`);
+  const response = await fetch(`${BASE_URL}/summary`);
   if (!response.ok) throw new Error("Failed to fetch summary data.");
   return response.json();
 };
 
 // Fetch vocabulary items that are due for review today
 export const getDueVocabs = async () => {
-  const response = await fetch(`${BASE_URL}/due?userId=${USER_ID}`);
+  const response = await fetch(`${BASE_URL}/due`);
   if (!response.ok) throw new Error("Failed to fetch pending reviews.");
   return response.json();
 };
@@ -97,7 +97,6 @@ export const getDueVocabs = async () => {
 // Submit a review result for an item
 export const submitReview = async (data: { 
   learningItemId: string, 
-  userId: string, 
   rating: number,
   responseTimeMs: number 
 }) => {

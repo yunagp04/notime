@@ -23,20 +23,37 @@ const listCtrl = new ListController(listRepo);
 const practiceCtrl = new PracticeController(vocabRepo, practiceSession);
 const notiCtrl = new NotificationController(vocabRepo);
 
-router.get("/lists", (req, res) => listCtrl.getLists(req, res));
-router.post('/add', (req, res) => vocabCtrl.create(req, res));
-router.get('/today', (req, res) => practiceCtrl.getTodayTasks(req, res));
-// router.post('/review', (req, res) => practiceCtrl.submitReview(req, res));
-router.get('/due', (req, res) => vocabCtrl.getDue(req, res));
-router.get('/state/:id', (req, res) => vocabCtrl.getState(req, res));
-router.post('/review', (req, res) => vocabCtrl.review(req, res));
-router.get('/dashboard', (req, res) => vocabCtrl.getDashboard(req, res));
-router.get('/summary', (req, res) => vocabCtrl.getSummary(req, res));
-router.get('/items', (req, res) => vocabCtrl.getVocabs(req, res));
-router.put('/:id', (req, res) => vocabCtrl.update(req, res));
-router.delete('/:id', (req, res) => vocabCtrl.delete(req, res));
-router.get('/search', (req, res) => vocabCtrl.search(req, res));
-router.post('/notifications/subscribe', (req, res) => notiCtrl.subscribe(req, res));
-router.post('/generate-definition', (req, res) => vocabCtrl.generateOnly(req, res));
+// --- 3. Lists & Collections ---
+router.get("/lists", (req, res) => listCtrl.getLists(req, res));   // ดึงรายการ Collection ทั้งหมด
+
+// --- 4. Practice & Spaced Repetition (SM2) ---
+router.get("/today", (req, res) => practiceCtrl.getTodayTasks(req, res)); // ดึงคำศัพท์ที่ต้องทบทวนวันนี้
+router.get("/due", (req, res) => vocabCtrl.getDue(req, res));             // ดึงจำนวนคำที่ค้างทบทวน
+router.post("/review", (req, res) => vocabCtrl.review(req, res));         // บันทึกผลการทบทวน (SM2 Algorithm)
+router.get("/state/:id", (req, res) => vocabCtrl.getState(req, res));     // ดูสถานะการจำของคำนั้นๆ
+
+// --- 5. Dashboard & Statistics ---
+router.get("/dashboard", (req, res) => vocabCtrl.getDashboard(req, res)); // ข้อมูลสรุปภาพรวม
+router.get("/summary", (req, res) => vocabCtrl.getSummary(req, res));     // สถิติการจำ (New/Learning/Mastered)
+
+// --- 6. AI & Utilities ---
+router.post("/generate-definition", (req, res) => vocabCtrl.generateOnly(req, res)); // เจนคำแปลอย่างเดียว
+router.post("/notifications/subscribe", (req, res) => notiCtrl.subscribe(req, res)); // ลงทะเบียน Push Notification
+
+// router.get("/lists", (req, res) => listCtrl.getLists(req, res));
+// router.post('/add', (req, res) => vocabCtrl.create(req, res));
+// router.get('/today', (req, res) => practiceCtrl.getTodayTasks(req, res));
+// // router.post('/review', (req, res) => practiceCtrl.submitReview(req, res));
+// router.get('/due', (req, res) => vocabCtrl.getDue(req, res));
+// router.get('/state/:id', (req, res) => vocabCtrl.getState(req, res));
+// router.post('/review', (req, res) => vocabCtrl.review(req, res));
+// router.get('/dashboard', (req, res) => vocabCtrl.getDashboard(req, res));
+// router.get('/summary', (req, res) => vocabCtrl.getSummary(req, res));
+// router.get('/items', (req, res) => vocabCtrl.getVocabs(req, res));
+// router.put('/:id', (req, res) => vocabCtrl.update(req, res));
+// router.delete('/:id', (req, res) => vocabCtrl.delete(req, res));
+// router.get('/search', (req, res) => vocabCtrl.search(req, res));
+// router.post('/notifications/subscribe', (req, res) => notiCtrl.subscribe(req, res));
+// router.post('/generate-definition', (req, res) => vocabCtrl.generateOnly(req, res));
 
 export default router;

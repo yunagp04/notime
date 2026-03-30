@@ -38,7 +38,6 @@ const ReviewPage = () => {
 
     try {
       await submitReview({
-        userId: USER_ID,
         learningItemId: currentCard.id,
         rating: quality,
         responseTimeMs: 3500 

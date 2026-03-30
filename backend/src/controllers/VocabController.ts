@@ -13,9 +13,9 @@ export class VocabController {
         if (!this.repo) console.error("❌ Repo is Missing!");
     }
 
-    async getVocabs(req: Request, res: Response) {
+    async getVocabs(req: any, res: Response) {
         // 🚩 แก้ให้รับทั้ง userId และ listId จาก Query String
-        const userId = req.query.userId as string;
+        const userId = req.usriId;
         const listId = req.query.listId as string; 
 
         try {
@@ -43,8 +43,9 @@ export class VocabController {
         }
     }
 
-    async create(req: Request, res: Response) {
-        const { word, listId, userId, skipAI, definition: userDef } = req.body;
+    async create(req: any, res: Response) {
+        const { word, listId, skipAI, definition: userDef } = req.body;
+        const userId = req.userId;
         try {
             let finalDefinition = userDef;
             

@@ -16,50 +16,51 @@ app.use(cors());
 app.use(express.json());
 
 app.use(async (req: any, res: any, next) => {
-    const userEmail = req.headers['x-ms-client-principal-name']; 
-    const providerId = req.headers['x-ms-client-principal-id'];
+    let userEmail = req.headers['x-ms-client-principal-name']; 
+    let providerId = req.headers['x-ms-client-principal-id'];
+
+    const isAzure = process.env.WEBSITE_HOSTNAME ? true : false;
+
+    // ถ้า Dev อยู่บนเครื่องตัวเอง ให้ใช้ User สมมติ
+    if (!userEmail && !isAzure) {
+        userEmail = 'yunagp04@gmail.com';
+        providerId = 'local-dev-id-001'; 
+        console.log("🛠️ [Dev Mode] Using Mock User");
+    }
 
     if (userEmail && providerId) {
         try {
-            // เช็คว่ามีใน DB หรือยัง
             let user = await vocabRepo.getUserByAuthProviderID(providerId); 
             
             if (!user) {
-                // ถ้าไม่เจอ ให้ลงทะเบียนใหม่
                 user = await vocabRepo.registerNewUser({
                     email: userEmail,
                     name: userEmail.split('@')[0],
                     provider: 'google',
                     providerUserId: providerId
                 });
-                console.log(`✨ [Auth] Auto-registered: ${userEmail}`);
+                console.log(`✨ Auto-registered: ${userEmail}`);
             }
-            // ฝาก ID ไว้ใน request
-            req.currentUserId = user.user_id; 
+            // ✅ ฝาก userId ไว้ใน request object เพื่อให้ Controller อื่นๆ เรียกใช้ได้
+            req.userId = user.user_id; 
         } catch (err) {
-            console.error("❌ [Auth] Database Error:", err);
+            console.error("❌ Auth Middleware Error:", err);
         }
     }
     next();
 });
 
+// --- API Routing ---
+// ใช้ Middleware ตรวจสอบ userId ก่อนเข้า vocabRoutes แค่ที่เดียวพอ
 app.use('/api/vocab', (req: any, res, next) => {
-    // ถ้าไม่มี ID (ไม่ได้ล็อกอิน) ให้หยุดตรงนี้เลย
-    if (!req.currentUserId) {
+    if (!req.userId) {
+        console.log("⚠️ [Unauthorized] No userId found in request");
         return res.status(401).json({ error: "Unauthorized: ไม่พบข้อมูลผู้ใช้" });
     }
-
-    // ส่ง ID ให้ Repository ใช้งาน
-    req.userId = req.currentUserId; 
-
-    // 🚩 พ่น Log เพื่อดูความเคลื่อนไหวบน Azure
-    console.log(`📡 [API Call] ${req.method} ${req.path} | By User: ${req.userId}`);
-    
     next();
 }, vocabRoutes);
 
-// Routes
-app.use('/api/vocab', vocabRoutes);
+// app.use('/api/vocab', vocabRoutes);
 
 let frontendPath = path.join(process.cwd(), 'frontend/build');
 
@@ -71,7 +72,6 @@ console.log('📍 Current Working Directory (cwd):', process.cwd());
 console.log('📂 Serving Frontend from:', frontendPath);
 
 app.use(express.static(frontendPath));
-
 app.get(/^(?!\/api).+/, (req, res) => {
     // res.sendFile(path.join(frontendPath, 'index.html'));
     const indexPath = path.join(frontendPath, 'index.html');
@@ -83,16 +83,20 @@ app.get(/^(?!\/api).+/, (req, res) => {
 });
 
 app.listen(port, () => {
-    // 🌐 เช็คว่าเป็น Azure หรือ Local
-    const isAzure = process.env.WEBSITE_HOSTNAME ? true : false;
-    const displayUrl = isAzure 
-        ? `https://${process.env.WEBSITE_HOSTNAME}` 
-        : `http://localhost:${port}`;
-
-    console.log(`🚀 Server is flying!`);
-    console.log(`📍 Environment: ${isAzure ? 'Azure Cloud' : 'Local Machine'}`);
-    console.log(`🔗 URL: ${displayUrl}`);
+    console.log(`🚀 Server is flying on port ${port}!`);
 });
+
+// app.listen(port, () => {
+//     // 🌐 เช็คว่าเป็น Azure หรือ Local
+//     const isAzure = process.env.WEBSITE_HOSTNAME ? true : false;
+//     const displayUrl = isAzure 
+//         ? `https://${process.env.WEBSITE_HOSTNAME}` 
+//         : `http://localhost:${port}`;
+
+//     console.log(`🚀 Server is flying!`);
+//     console.log(`📍 Environment: ${isAzure ? 'Azure Cloud' : 'Local Machine'}`);
+//     console.log(`🔗 URL: ${displayUrl}`);
+// });
 
 process.on('unhandledRejection', (reason, promise) => {
     console.error('❌ Unhandled Rejection at:', promise, 'reason:', reason);
