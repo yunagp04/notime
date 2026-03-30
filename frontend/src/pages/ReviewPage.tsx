@@ -5,8 +5,6 @@ import { useNavigate } from 'react-router-dom';
 import { ChevronLeft, Eye, CheckCircle2, XCircle, Trophy, Loader2 } from 'lucide-react';
 import { getDueVocabs, submitReview } from '../services/vocabApi';
 
-const USER_ID = "888f10a9-6345-4a8a-99a1-79984863acf1";
-
 const ReviewPage = () => {
   const navigate = useNavigate();
   const [cards, setCards] = useState<any[]>([]);
