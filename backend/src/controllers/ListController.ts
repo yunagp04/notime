@@ -4,11 +4,11 @@ import { IListRepository } from "../interfaces/IListRepository";
 export class ListController {
   constructor(private repo: IListRepository) {}
 
-  async getLists(req: Request, res: Response) {
-    const userId = req.query.userId as string;
+  async getLists(req: any, res: Response) {
+    const userId = req.userId;
 
     if (!userId) {
-      return res.status(400).json({ error: "ต้องมี userId" });
+      return res.status(401).json({ error: "Unauthorized" });
     }
 
     try {

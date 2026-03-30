@@ -8,8 +8,9 @@ export class PracticeController {
         private session: PracticeSession
     ) {}
 
-    async getTodayTasks(req: Request, res: Response) {
-        const { userId } = req.query;
+    async getTodayTasks(req: any, res: Response) {
+        // const { userId } = req.query;
+        const userId = req.userId;
         if (!userId) return res.status(400).json({ error: "ระบุ userId" });
 
         try {
@@ -20,8 +21,11 @@ export class PracticeController {
         }
     }
 
-    async submitReview(req: Request, res: Response) {
-        const { userId, itemId, rating } = req.body;
+    async submitReview(req: any, res: Response) {
+        // const { userId, itemId, rating } = req.body;
+        const { itemId, rating } = req.body;
+        const userId = req.userId;
+        
         try {
             const currentItem = await this.repo.getReviewState(itemId);
             await this.session.submitReview(currentItem, userId, rating);

@@ -15,8 +15,10 @@ export class VocabController {
 
     async getVocabs(req: any, res: Response) {
         // 🚩 แก้ให้รับทั้ง userId และ listId จาก Query String
-        const userId = req.usriId;
+        const userId = req.userId;
         const listId = req.query.listId as string; 
+
+        if (!userId) return res.status(401).json({ error: "Unauthorized" });
 
         try {
             // 🚩 ส่งทั้งคู่ไปที่ Repo เพื่อให้กรองข้อมูลได้ถูกต้อง
@@ -98,9 +100,10 @@ export class VocabController {
     }
 
 
-    async getDue(req: Request, res: Response) {
-        const userId = req.query.userId as string;
-        if (!userId) return res.status(400).json({ error: "ต้องระบุ userId" });
+    async getDue(req: any, res: Response) {
+        // const userId = req.query.userId as string;
+        const userId = req.userId;
+        // if (!userId) return res.status(400).json({ error: "ต้องระบุ userId" });
 
         try {
             const duelist = await this.repo.getDueVocabs(userId);
@@ -122,9 +125,9 @@ export class VocabController {
         }
     }
 
-    async getDashboard(req: Request, res: Response) {
-        const userId = req.query.userId as string;
-        if (!userId) return res.status(400).json({ error: "ระบุ userId" });
+    async getDashboard(req: any, res: Response) {
+        const userId = req.userId;
+        // if (!userId) return res.status(400).json({ error: "ระบุ userId" });
 
         try {
             const summary = await this.repo.getReviewSummary(userId);
@@ -136,9 +139,12 @@ export class VocabController {
         }
     }
 
-    async getSummary(req: Request, res: Response) {
+    async getSummary(req: any, res: Response) {
         try {
-            const { userId } = req.query;
+            const { userId } = req.userId;
+
+            if (!userId) return res.status(401).json({ error: "Unauthorized" });
+
             // 🚩 เรียก Repository function ที่โบรมีอยู่แล้ว
             const summary = await this.repo.getReviewSummary(userId as string);
             const history = await this.repo.getReviewHistory(userId as string);

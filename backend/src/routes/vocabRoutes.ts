@@ -40,20 +40,10 @@ router.get("/summary", (req, res) => vocabCtrl.getSummary(req, res));     // ส
 router.post("/generate-definition", (req, res) => vocabCtrl.generateOnly(req, res)); // เจนคำแปลอย่างเดียว
 router.post("/notifications/subscribe", (req, res) => notiCtrl.subscribe(req, res)); // ลงทะเบียน Push Notification
 
-// router.get("/lists", (req, res) => listCtrl.getLists(req, res));
-// router.post('/add', (req, res) => vocabCtrl.create(req, res));
-// router.get('/today', (req, res) => practiceCtrl.getTodayTasks(req, res));
-// // router.post('/review', (req, res) => practiceCtrl.submitReview(req, res));
-// router.get('/due', (req, res) => vocabCtrl.getDue(req, res));
-// router.get('/state/:id', (req, res) => vocabCtrl.getState(req, res));
-// router.post('/review', (req, res) => vocabCtrl.review(req, res));
-// router.get('/dashboard', (req, res) => vocabCtrl.getDashboard(req, res));
-// router.get('/summary', (req, res) => vocabCtrl.getSummary(req, res));
-// router.get('/items', (req, res) => vocabCtrl.getVocabs(req, res));
-// router.put('/:id', (req, res) => vocabCtrl.update(req, res));
-// router.delete('/:id', (req, res) => vocabCtrl.delete(req, res));
-// router.get('/search', (req, res) => vocabCtrl.search(req, res));
-// router.post('/notifications/subscribe', (req, res) => notiCtrl.subscribe(req, res));
-// router.post('/generate-definition', (req, res) => vocabCtrl.generateOnly(req, res));
+router.get("/", (req, res) => vocabCtrl.getVocabs(req, res));      // ดึงคำศัพท์ทั้งหมด
+router.post("/", (req, res) => vocabCtrl.create(req, res));        // เพิ่มคำศัพท์ใหม่ (Navbar ยิงมาที่นี่)
+router.get("/search", (req, res) => vocabCtrl.search(req, res));   // ค้นหา AI
+router.put("/:id", (req, res) => vocabCtrl.update(req, res));      // อัปเดต
+router.delete("/:id", (req, res) => vocabCtrl.delete(req, res));   // ลบ
 
 export default router;
