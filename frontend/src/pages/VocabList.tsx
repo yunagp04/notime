@@ -308,7 +308,8 @@ const VocabList = () => {
                         <td className="px-12 py-8 text-right">
                           <div className="flex gap-3 justify-end opacity-0 group-hover:opacity-100 transition-all">
                             <button 
-                              onClick={() => alert(`Finding synonyms for: ${v.word}`)} // 🎯 ใส่ Logic AI ทีหลังได้ครับ
+                              // onClick={() => alert(`Finding synonyms for: ${v.word}`)} // 🎯 ใส่ Logic AI ทีหลังได้ครับ
+                              onClick={() => handleFindSynonyms(v.word)}
                               title="Find Synonyms"
                               className="p-3 bg-white text-emerald-600 rounded-2xl border border-slate-100 shadow-sm hover:bg-emerald-50 transition-all"
                             >

@@ -57,6 +57,7 @@ const Dashboard = () => {
 
     useEffect(() => {
         loadDashboardData();
+        setChartData(prev => [...prev]);
     }, [loadDashboardData]);
 
     if (isLoading) {
