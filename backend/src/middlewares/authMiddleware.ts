@@ -1,5 +1,5 @@
 import { Request, Response, NextFunction } from "express";
-import { SqlUserRepository } from "../repositories/SqlUserRepository";
+import { SqlUserRepository } from "../repositories/SqlUserRepository"; // ✅ เปลี่ยนเป็น UserRepository
 
 const userRepo = new SqlUserRepository();
 
@@ -7,50 +7,61 @@ export const authMiddleware = async (req: any, res: Response, next: NextFunction
     try {
         const principal = req.headers["x-ms-client-principal"];
         const isAzure = !!process.env.WEBSITE_HOSTNAME;
-        
-        let providerUserId: string;
-        let email: string;
-        let name: string;
+
+        let providerUserId: string | undefined;
+        let email: string | undefined;
+        let name: string | undefined;
         let provider: string;
 
         if (principal) {
-            // --- 1. AZURE MODE (Production) ---
+            // --- AZURE MODE ---
             const decoded = JSON.parse(Buffer.from(principal as string, "base64").toString("ascii"));
-            
-            // 🎯 ดึง ID จาก nameidentifier (ID จริงที่ Google ส่งให้ Azure)
-            providerUserId = decoded.claims?.find((c: any) => c.typ === "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier")?.val;
+            const claims = decoded.claims || [];
 
-            // 📧 ดึง Email จาก emailaddress
-            email = decoded.claims?.find((c: any) => c.typ === "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress")?.val;
+            // ฟังก์ชันช่วยดึงค่าจาก Claims หลายชื่อ (Fallback)
+            const getClaim = (types: string[]) => claims.find((c: any) => types.includes(c.typ))?.val;
 
-            // 👤 ดึง Name (แสดงชื่อ Paweena Sirito)
-            name = decoded.claims?.find((c: any) => c.typ === "name")?.val || email || "Unknown User";
+            // 🎯 ดึง ID จาก nameidentifier (จาก Payload จริงของคุณ Paweena)
+            providerUserId = decoded.userId || getClaim([
+                "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier",
+                "sub"
+            ]);
 
-            // 🚨 Check ป้องกัน Error 515 (ห้ามเป็น NULL)
+            // 📧 ดึง Email
+            email = decoded.userDetails || getClaim([
+                "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress",
+                "email"
+            ]);
+
+            // 👤 ดึง Name
+            name = getClaim(["name"]) || email || "Unknown User";
+
+            // 🚨 Safety Guard: ถ้า ID หรือ Email ยังเป็น NULL ห้ามไปต่อ
             if (!providerUserId || !email) {
-                console.error("❌ Auth Error: Identity data incomplete from Azure");
-                console.log("🛠️ DEBUG DECODED PAYLOAD:", JSON.stringify(decoded, null, 2));
-                return res.status(401).json({ message: "Identity missing: ID or Email not found" });
+                console.error("❌ Auth Error: Missing Identity Data");
+                console.log("🛠️ DEBUG PAYLOAD:", JSON.stringify(decoded, null, 2));
+                return res.status(401).json({ 
+                    message: "Identity missing", 
+                    details: { hasId: !!providerUserId, hasEmail: !!email } 
+                });
             }
-            
+
             provider = "google";
         } else if (!isAzure) {
-            // --- 2. DEV MODE (Local) ---
-            console.log("🛠️ [Dev Mode] Using Mock User");
+            // --- DEV MODE ---
             providerUserId = "local-dev-id-001";
             email = "dev@test.com";
             name = "Developer";
             provider = "local";
         } else {
-            // กรณีรันบน Azure แต่ไม่มี Header (ยังไม่ได้ Login)
             return res.status(401).json({ message: "Unauthorized: No principal header" });
         }
 
-        // --- 3. จัดการข้อมูลใน Database ---
+        // --- DATABASE LOGIC ---
         let user = await userRepo.getUserByAuthProviderID(providerUserId);
 
         if (!user) {
-            console.log(`🚀 Registering new user: ${email} (${providerUserId})`);
+            console.log(`🔥 Registering new user: ${email} (ID: ${providerUserId})`);
             user = await userRepo.registerNewUser({
                 email,
                 name,
@@ -59,12 +70,11 @@ export const authMiddleware = async (req: any, res: Response, next: NextFunction
             });
         }
 
-        // --- 4. ส่งต่อข้อมูลให้ Controller อื่นๆ ---
         req.userId = user.user_id;
         next();
 
-    } catch (err) {
-        console.error("❌ Auth Middleware Error:", err);
-        return res.status(500).json({ message: "Internal Auth Error" });
+    } catch (err: any) {
+        console.error("❌ Auth Middleware Error:", err.message);
+        return res.status(500).json({ message: "Authentication failed" });
     }
 };
