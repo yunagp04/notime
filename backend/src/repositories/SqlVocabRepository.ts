@@ -210,6 +210,32 @@ export class SqlVocabRepository implements IVocabRepository {
         return result.recordset[0];
     }
 
+    async getMemoryStrength(userId: string) {
+        const req = await this.request;
+        const result = await req
+            .input('userId', sql.UniqueIdentifier, userId)
+            .query(`
+                SELECT 
+                    CASE 
+                        WHEN interval_days > 30 THEN 'Mastered'
+                        WHEN interval_days BETWEEN 10 AND 30 THEN 'Strong'
+                        WHEN interval_days BETWEEN 1 AND 9 THEN 'Learning'
+                        ELSE 'Struggling'
+                    END as status,
+                    COUNT(*) as count
+                FROM ReviewState
+                WHERE user_id = @userId
+                GROUP BY 
+                    CASE 
+                        WHEN interval_days > 30 THEN 'Mastered'
+                        WHEN interval_days BETWEEN 10 AND 30 THEN 'Strong'
+                        WHEN interval_days BETWEEN 1 AND 9 THEN 'Learning'
+                        ELSE 'Struggling'
+                    END
+            `);
+        return result.recordset;
+    }
+
     // ==========================================
     // 🤖 SECTION: AI & VECTOR SEARCH
     // ==========================================

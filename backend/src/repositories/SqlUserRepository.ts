@@ -25,18 +25,26 @@ export class SqlUserRepository {
     /**
      * หา User จาก Provider ID (เช่น Google ID จาก Azure Header)
      */
-    async getUserByAuthProviderID(providerId: string): Promise<any | null> {
+    async getUserByAuthProviderID(providerUserId: string): Promise<any | null> {
         const req = await this.request;
-        const result = await req
-            .input("providerId", sql.NVarChar, providerId)
-            .query(`
-                SELECT TOP 1 u.user_id, u.email, u.display_name 
-                FROM [User] u
-                JOIN UserAuthProvider uap ON u.user_id = uap.user_id
-                WHERE uap.provider_user_id = @providerId
-            `);
-        
-        return result.recordset[0] || null;
+            const result = await req
+                .input('providerUserId', sql.NVarChar, providerUserId)
+                .query(`
+                    SELECT u.* FROM [User] u
+                    LEFT JOIN UserAuthProvider ap ON u.user_id = ap.user_id
+                    WHERE ap.provider_user_id = @providerUserId
+                `);
+            return result.recordset[0];
+    }
+
+    /**
+                        u.*, 
+                        ap.provider_user_name
+                    FROM [User] u
+                    LEFT JOIN UserAuthProvider ap ON u.user_id = ap.user_id
+                    WHERE u.email = @email
+                `);
+            return result.recordset[0];
     }
 
     /**
