@@ -61,7 +61,14 @@ export const authMiddleware = async (req: any, res: Response, next: NextFunction
         let user = await userRepo.getUserByAuthProviderID(providerUserId);
 
         if (!user) {
-            console.log(`🔥 Registering new user: ${email} (ID: ${providerUserId})`);
+         
+            console.log(`🔍 Checking fallback email: ${email}`);
+            user = await userRepo.getUserByEmail(email); 
+        }
+
+        if (!user) {
+     
+            console.log(`🔥 Registering new user: ${email}`);
             user = await userRepo.registerNewUser({
                 email,
                 name,

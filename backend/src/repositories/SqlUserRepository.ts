@@ -37,14 +37,12 @@ export class SqlUserRepository {
             return result.recordset[0];
     }
 
-    /**
-                        u.*, 
-                        ap.provider_user_name
-                    FROM [User] u
-                    LEFT JOIN UserAuthProvider ap ON u.user_id = ap.user_id
-                    WHERE u.email = @email
-                `);
-            return result.recordset[0];
+    async getUserByEmail(email: string) {
+        const req = await this.request;
+        const result = await req
+            .input('email', sql.NVarChar, email)
+            .query('SELECT * FROM [User] WHERE email = @email');
+        return result.recordset[0];
     }
 
     /**
