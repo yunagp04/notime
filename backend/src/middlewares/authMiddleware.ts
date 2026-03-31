@@ -14,40 +14,43 @@ export const authMiddleware = async (req: any, res: Response, next: NextFunction
         let provider: string;
 
         if (principal) {
-            // AZURE MODE
+            // --- 1. AZURE MODE (Production) ---
             const decoded = JSON.parse(Buffer.from(principal as string, "base64").toString("ascii"));
-            providerUserId = decoded.userId || 
-                    decoded.claims?.find((c: any) => c.typ === "http://schemas.microsoft.com/identity/claims/objectidentifier")?.val ||
-                    decoded.claims?.find((c: any) => c.typ === "oid")?.val ||
-                    decoded.claims?.find((c: any) => c.typ === "sub")?.val;
-            email = decoded.userDetails || 
-                    decoded.claims?.find((c: any) => c.typ === "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress")?.val ||
-                    decoded.claims?.find((c: any) => c.typ === "email")?.val;
+            
+            // 🎯 ดึง ID จาก nameidentifier (ID จริงที่ Google ส่งให้ Azure)
+            providerUserId = decoded.claims?.find((c: any) => c.typ === "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier")?.val;
+
+            // 📧 ดึง Email จาก emailaddress
+            email = decoded.claims?.find((c: any) => c.typ === "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress")?.val;
+
+            // 👤 ดึง Name (แสดงชื่อ Paweena Sirito)
             name = decoded.claims?.find((c: any) => c.typ === "name")?.val || email || "Unknown User";
+
+            // 🚨 Check ป้องกัน Error 515 (ห้ามเป็น NULL)
             if (!providerUserId || !email) {
-                console.error("❌ Auth Error: Missing Identity Data");
-        console.log("🛠️ DEBUG FULL DECODED PAYLOAD:", JSON.stringify(decoded, null, 2));
-        return res.status(401).json({ 
-            message: "Identity missing", 
-            details: { hasId: !!providerUserId, hasEmail: !!email } 
-        });
+                console.error("❌ Auth Error: Identity data incomplete from Azure");
+                console.log("🛠️ DEBUG DECODED PAYLOAD:", JSON.stringify(decoded, null, 2));
+                return res.status(401).json({ message: "Identity missing: ID or Email not found" });
             }
+            
             provider = "google";
         } else if (!isAzure) {
-            // DEV MODE
+            // --- 2. DEV MODE (Local) ---
             console.log("🛠️ [Dev Mode] Using Mock User");
             providerUserId = "local-dev-id-001";
             email = "dev@test.com";
             name = "Developer";
             provider = "local";
         } else {
+            // กรณีรันบน Azure แต่ไม่มี Header (ยังไม่ได้ Login)
             return res.status(401).json({ message: "Unauthorized: No principal header" });
         }
 
+        // --- 3. จัดการข้อมูลใน Database ---
         let user = await userRepo.getUserByAuthProviderID(providerUserId);
 
         if (!user) {
-            console.log(`🚀 Registering new user: ${email} (${provider})`);
+            console.log(`🚀 Registering new user: ${email} (${providerUserId})`);
             user = await userRepo.registerNewUser({
                 email,
                 name,
@@ -56,6 +59,7 @@ export const authMiddleware = async (req: any, res: Response, next: NextFunction
             });
         }
 
+        // --- 4. ส่งต่อข้อมูลให้ Controller อื่นๆ ---
         req.userId = user.user_id;
         next();
 
