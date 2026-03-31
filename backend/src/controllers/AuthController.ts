@@ -44,7 +44,8 @@ export class AuthController {
                 user = await userRepo.registerNewUser({
                     email,
                     name,
-                    provider: isAzure ? "google" : "local",
+                    provider: "google",
+                    // provider: isAzure ? "google" : "local",
                     providerUserId
                 });
             }
