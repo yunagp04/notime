@@ -33,6 +33,8 @@ jobs:
         run: |
           cd backend
           npm install
+          rm -rf dist
+          rm -f tsconfig.tsbuildinfo
           npm run build
 
       - name: Clean up node_modules before upload (Optional but Recommended)
