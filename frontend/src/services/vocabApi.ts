@@ -112,26 +112,12 @@ export const generateAIDefinition = async (word: string) => {
   return data.definition;
 };
 
-// Fetch general dashboard statistics
-// export const getDashboardStats = async () => {
-//   const response = await fetch(`${BASE_URL}/dashboard`);
-//   if (!response.ok) throw new Error("Failed to fetch dashboard statistics.");
-//   return response.json();
-// };
-
 // Fetch summary metrics including learning progress and history
 export const getSummary = async () => {
   const response = await fetch(`${BASE_URL}/summary`);
   if (!response.ok) throw new Error("Failed to fetch summary data.");
   return response.json();
 };
-
-// Fetch vocabulary items that are due for review today
-// export const getDueVocabs = async () => {
-//   const response = await fetch(`${BASE_URL}/today`); 
-//   if (!response.ok) throw new Error("Failed to fetch pending reviews.");
-//   return response.json();
-// };
 
 // Submit a review result for an item
 export const submitReview = async (data: { 
@@ -157,5 +143,13 @@ export const subscribePush = async (subscription: any) => {
     },
     body: JSON.stringify({ subscription }),
   });
+  return res.json();
+};
+
+export const getListPractice = async (listId: string) => {
+  const res = await fetch(`${BASE_URL}/practice/list/${listId}`, { 
+    headers: getHeaders() 
+  });
+  if (!res.ok) throw new Error("ไม่สามารถโหลดบทเรียนจากลิสต์นี้ได้");
   return res.json();
 };

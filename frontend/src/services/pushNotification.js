@@ -24,7 +24,8 @@ export const setupNotifications = async () => {
 
             const subscription = await registration.pushManager.subscribe(subscribeOptions);
 
-            await fetch('http://localhost:5000/api/vocab/subscribe', {
+            // await fetch('http://localhost:5000/api/vocab/subscribe', {
+            await fetch('/api/vocab/subscribe', {
                 method: 'POST',
                 headers: { 
                     'Content-Type': 'application/json',
@@ -33,7 +34,7 @@ export const setupNotifications = async () => {
                 body: JSON.stringify({ subscription })
             });
 
-            console.log('🚀 ลงทะเบียนแจ้งเตือนจริงสำเร็จแล้วโบร!');
+            console.log('🚀 ลงทะเบียนแจ้งเตือนจริงสำเร็จแล้ว!');
         } catch (error) {
             console.error('❌ ไม่สามารถลงทะเบียนแจ้งเตือนได้:', error);
         }

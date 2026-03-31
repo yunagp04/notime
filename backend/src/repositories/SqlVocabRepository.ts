@@ -348,4 +348,30 @@ export class SqlVocabRepository implements IVocabRepository {
             `);
         return result.recordset;
     }
+
+    async getRandomVocabs(userId: string, limit: number = 10): Promise<any[]> {
+        const req = await this.request;
+        const result = await req
+            .input('userId', sql.UniqueIdentifier, userId)
+            .input('limit', sql.Int, limit)
+            .query(`
+                SELECT TOP (@limit) * FROM LearningItem 
+                WHERE user_id = @userId
+                ORDER BY NEWID() -- 🎯 จุดสำคัญ: สั่งสุ่มลำดับข้อมูลทุกครั้งที่เรียก
+            `);
+        return result.recordset;
+    }
+
+    async getVocabsByList(userId: string, listId: string): Promise<any[]> {
+        const req = await this.request;
+        const result = await req
+            .input('userId', sql.UniqueIdentifier, userId)
+            .input('listId', sql.UniqueIdentifier, listId)
+            .query(`
+                SELECT * FROM LearningItem 
+                WHERE user_id = @userId AND list_id = @listId
+                ORDER BY next_review_at ASC -- 🎯 เน้นทบทวนคำที่ใกล้ลืมก่อนในลิสต์นี้
+            `);
+        return result.recordset;
+    }
 }

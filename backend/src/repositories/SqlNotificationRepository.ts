@@ -13,33 +13,25 @@ export class SqlNotificationRepository implements INotificationRepository {
     async saveSubscription(userId: string, sub: any): Promise<void> {
         const req = await this.getRequest();
         await req
-            .input('id', sql.UniqueIdentifier, uuidv4())
             .input('userId', sql.UniqueIdentifier, userId)
             .input('endpoint', sql.NVarChar, sub.endpoint)
             .input('p256dh', sql.NVarChar, sub.keys.p256dh)
             .input('auth', sql.NVarChar, sub.keys.auth)
-            .query(`INSERT INTO PushSubscription (subscription_id, user_id, endpoint, p256dh_key, auth_key, created_at)
-                    VALUES (@id, @userId, @endpoint, @p256dh, @auth, GETDATE())`);
+            .query(`
+                IF EXISTS (SELECT 1 FROM PushSubscription WHERE endpoint = @endpoint)
+                    UPDATE PushSubscription SET user_id = @userId WHERE endpoint = @endpoint
+                ELSE
+                    INSERT INTO PushSubscription (subscription_id, user_id, endpoint, p256dh_key, auth_key, created_at)
+                    VALUES (NEWID(), @userId, @endpoint, @p256dh, @auth, GETDATE())
+            `);
     }
 
-    // ✅ เพิ่มส่วนที่ขาดหายไปเพื่อให้ Interface สมบูรณ์
     async getSubscriptions(userId: string): Promise<any[]> {
         const req = await this.getRequest();
         const result = await req
             .input('userId', sql.UniqueIdentifier, userId)
             .query(`SELECT * FROM PushSubscription WHERE user_id = @userId`);
         return result.recordset;
-    }
-
-    async addToQueue(userId: string, itemId: string, scheduledAt: Date): Promise<void> {
-        const req = await this.getRequest();
-        await req
-            .input('id', sql.UniqueIdentifier, uuidv4())
-            .input('userId', sql.UniqueIdentifier, userId)
-            .input('itemId', sql.UniqueIdentifier, itemId)
-            .input('scheduled', sql.DateTime, scheduledAt)
-            .query(`INSERT INTO NotificationQueue (queue_id, user_id, learning_item_id, scheduled_at, status, created_at)
-                    VALUES (@id, @userId, @itemId, @scheduled, 'pending', GETDATE())`);
     }
 
     async getPendingQueue(): Promise<any[]> {
@@ -59,5 +51,99 @@ export class SqlNotificationRepository implements INotificationRepository {
             .input('id', sql.UniqueIdentifier, queueId)
             .input('status', sql.NVarChar, status)
             .query(`UPDATE NotificationQueue SET status = @status, sent_at = GETDATE() WHERE queue_id = @id`);
+    }
+
+    async getUsersWithDueItems(maxPerNotify: number = 10): Promise<any[]> {
+        const req = await this.getRequest();
+        // ใช้ TOP (@max) เพื่อจำกัดจำนวนคำต่อการแจ้งเตือน 1 ครั้ง
+        const result = await req
+            .input('max', sql.Int, maxPerNotify)
+            .query(`
+                SELECT u.user_id, 
+                    (SELECT COUNT(*) FROM (
+                        SELECT TOP (@max) learning_item_id 
+                        FROM LearningItem 
+                        WHERE user_id = u.user_id AND next_review_at <= GETDATE()
+                        ORDER BY next_review_at ASC -- เอาคำที่เก่าที่สุด/สำคัญที่สุดมาทบทวนก่อน
+                    ) AS SubQuery) as due_count
+                FROM [User] u
+                WHERE EXISTS (
+                    SELECT 1 FROM LearningItem li 
+                    WHERE li.user_id = u.user_id AND li.next_review_at <= GETDATE()
+                )
+            `);
+        return result.recordset;
+    }
+
+    async getDueCountForUser(userId: string): Promise<number> {
+        const req = await this.getRequest();
+        const result = await req
+            .input('userId', sql.UniqueIdentifier, userId)
+            .query(`
+                SELECT COUNT(*) as count 
+                FROM LearningItem 
+                WHERE user_id = @userId AND next_review_at <= GETDATE()
+            `);
+        return result.recordset[0]?.count || 0;
+    }
+
+    async getAllActiveSubscribers(): Promise<any[]> {
+        const req = await this.getRequest();
+        const result = await req.query(`
+            SELECT u.user_id, u.noti_mode, u.noti_list_id 
+            FROM [User] u
+            WHERE EXISTS (SELECT 1 FROM PushSubscription s WHERE s.user_id = u.user_id)
+        `);
+        return result.recordset;
+    }
+
+    async getWordsForNotification(userId: string, mode: string, listId?: string, limit: number = 10): Promise<any[]> {
+        const req = await this.getRequest();
+        let query = `SELECT TOP (@limit) learning_item_id FROM LearningItem WHERE user_id = @userId `;
+
+        if (mode === 'list' && listId) {
+            query += `AND list_id = @listId `;
+        }
+        
+        if (mode === 'random') {
+            query += `ORDER BY NEWID()`; // สุ่ม
+        } else {
+            query += `AND next_review_at <= GETDATE() ORDER BY next_review_at ASC`; // ตามรอบ
+        }
+
+        const result = await req
+            .input('userId', sql.UniqueIdentifier, userId)
+            .input('listId', sql.UniqueIdentifier, listId)
+            .input('limit', sql.Int, limit)
+            .query(query);
+        return result.recordset;
+    }
+
+    async addToQueue(userId: string, itemId: string | null, scheduledAt: Date, message?: string): Promise<void> {
+        const req = await this.getRequest();
+        await req
+            .input('id', sql.UniqueIdentifier, uuidv4())
+            .input('userId', sql.UniqueIdentifier, userId)
+            .input('itemId', sql.UniqueIdentifier, itemId)
+            .input('scheduled', sql.DateTime, scheduledAt)
+            .input('message', sql.NVarChar, message || 'ได้เวลาทบทวนศัพท์แล้ว!')
+            .query(`INSERT INTO NotificationQueue (queue_id, user_id, learning_item_id, scheduled_at, status, custom_message, created_at)
+                    VALUES (@id, @userId, @itemId, @scheduled, 'pending', @message, GETDATE())`);
+    }
+
+    async updateNotificationSettings(userId: string, settings: any): Promise<void> {
+        const req = await this.getRequest();
+        await req
+            .input('userId', sql.UniqueIdentifier, userId)
+            .input('mode', sql.NVarChar, settings.mode)
+            .input('listId', sql.UniqueIdentifier, settings.listId || null)
+            .input('maxItems', sql.Int, settings.maxItems || 10)
+            .query(`
+                UPDATE [User] 
+                SET noti_mode = @mode, 
+                    noti_list_id = @listId, 
+                    max_items_per_notif = @maxItems 
+                WHERE user_id = @userId
+            `);
     }
 }

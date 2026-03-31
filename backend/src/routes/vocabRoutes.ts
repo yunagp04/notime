@@ -55,13 +55,23 @@ router.get("/state/:id", (req, res) => vocabCtrl.getState(req, res));
 router.put("/items/:id", (req, res) => vocabCtrl.update(req, res));
 router.delete("/items/:id", (req, res) => vocabCtrl.delete(req, res));
 router.post("/generate-definition", (req, res) => vocabCtrl.generateOnly(req, res));
+router.post("/synonyms", (req, res) => vocabCtrl.getSynonyms(req, res));
 
 // Spaced Repetition (Practice)
 router.get("/today", (req, res) => practiceCtrl.getTodayTasks(req, res));
 router.post("/review", (req, res) => vocabCtrl.review(req, res));
+router.get("/random-practice", (req, res) => vocabCtrl.getRandomPractice(req, res));
+router.get("/practice/list/:listId", (req, res) => vocabCtrl.getPracticeByList(req, res));
 
-// Notifications
+// 📚 การฝึกฝน (Practice Modes)
+router.get("/today", (req, res) => practiceCtrl.getTodayTasks(req, res)); // ทวนตาม SM-2
+router.get("/random-practice", (req, res) => vocabCtrl.getRandomPractice(req, res)); // 🆕 โหมดสุ่ม
+router.get("/practice/list/:listId", (req, res) => vocabCtrl.getPracticeByList(req, res)); // 🆕 ทวนรายลิสต์
+
+// 🔔 การแจ้งเตือน (Notifications)
 router.post("/subscribe", (req, res) => notiCtrl.subscribe(req, res));
+router.post("/subscribe", (req, res) => notiCtrl.subscribe(req, res)); // ลงทะเบียน Browser
+router.post("/settings/notifications", (req, res) => notiCtrl.updateSettings(req, res)); // 🆕 บันทึกโหมด (All/Random/List)
 
 export { vocabRepo, notiRepo };
 export default router;

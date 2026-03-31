@@ -2,36 +2,45 @@ import { ISpacingAlgorithm, ReviewState } from '../interfaces/ISpacingAlgorithm'
 
 export class SM2Algorithm implements ISpacingAlgorithm {
     calculateNextReview(state: any, rating: number): any {
-        const currentState = state || {
-            difficulty: 2.5,
-            intervalDays: 0,
-            repetition: 0
-        };
+        // 1. Map ค่าจาก Database (ที่มี underscore) เข้าตัวแปร Local
+        const difficulty = state?.difficulty || 2.5;
+        const repetition = state?.repetition || 0;
+        const currentInterval = state?.interval_days || 0;
 
-        let { difficulty, intervalDays, repetition } = currentState
+        let newInterval = 1;
+        let newDifficulty = difficulty;
+        let newRepetition = repetition;
 
         if (rating >= 3) {
-            if (intervalDays === 0) intervalDays = 1;
-            else if (intervalDays === 1) intervalDays = 6;
-            else intervalDays = Math.round(intervalDays * difficulty);
-
-            difficulty = difficulty + (0.1 - (5 - rating) * (0.08 + (5 - rating) * 0.02));
-            repetition += 1; // ✅ เพิ่มบรรทัดนี้ เพื่อให้ระบบรู้ว่าจำได้ต่อเนื่องกี่ครั้งแล้ว
+            // อัลกอริทึม SM-2 มาตรฐาน
+            if (repetition === 0) {
+                newInterval = 1;
+            } else if (repetition === 1) {
+                newInterval = 6;
+            } else {
+                newInterval = Math.round(currentInterval * difficulty);
+            }
+            
+            // คำนวณความยากใหม่
+            newDifficulty = difficulty + (0.1 - (5 - rating) * (0.08 + (5 - rating) * 0.02));
+            newRepetition += 1;
         } else {
-            repetition = 0;   // ✅ ตอบผิดให้รีเซ็ตเป็น 0 (มีอยู่แล้ว)
-            intervalDays = 1;
+            // ตอบผิด (Rating < 3) ให้เริ่มนับหนึ่งใหม่
+            newInterval = 1;
+            newRepetition = 0;
         }
 
-        if (difficulty < 1.3) difficulty = 1.3;
+        if (newDifficulty < 1.3) newDifficulty = 1.3;
 
+        // 2. ตั้งวันทบทวนถัดไปจาก "วันนี้"
         const nextDate = new Date();
-        nextDate.setDate(nextDate.getDate() + intervalDays || 1);
+        nextDate.setDate(nextDate.getDate() + newInterval);
 
         return {
-            ...currentState,            // ✅ เอา Spread ไว้บรรทัดแรก
-            difficulty: difficulty || 2.5,
-            intervalDays: intervalDays || 1,
-            repetition: repetition || 0,
+            // 🎯 ส่งค่ากลับโดยระบุชื่อฟิลด์ให้ชัดเจน เพื่อไป Map ลง DB ต่อ
+            difficulty: newDifficulty,
+            interval_days: newInterval, 
+            repetition: newRepetition,
             nextReviewAt: nextDate
         };
     }

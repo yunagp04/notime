@@ -222,4 +222,46 @@ export class VocabController {
             return res.status(500).json({ error: "การค้นหาขัดข้อง", details: error.message });
         }
     }
+
+    async getRandomPractice(req: any, res: Response) {
+        const userId = req.userId;
+        const limit = parseInt(req.query.limit as string) || 10;
+        
+        try {
+            const items = await this.repo.getRandomVocabs(userId, limit);
+            return res.json(items);
+        } catch (error: any) {
+            return res.status(500).json({ error: "ไม่สามารถดึงข้อมูลแบบสุ่มได้" });
+        }
+    }
+
+    async getPracticeByList(req: any, res: Response) {
+        const { listId } = req.params; // รับ ID ลิสต์จาก URL
+        const userId = req.userId;
+
+        try {
+            const items = await this.repo.getVocabsByList(userId, listId);
+            if (items.length === 0) {
+                return res.status(404).json({ message: "ไม่พบคำศัพท์ในลิสต์นี้" });
+            }
+            return res.json(items);
+        } catch (error: any) {
+            return res.status(500).json({ error: "เกิดข้อผิดพลาดในการดึงข้อมูลลิสต์" });
+        }
+    }
+
+    async getSynonyms(req: any, res: Response) {
+        const { word } = req.body;
+        const targetLang = req.query.lang || 'Thai'; // ดึงจาก Settings ได้
+        try {
+            const prompt = `Give me 5 synonyms or related words for "${word}" in ${targetLang}. 
+                            Return only a JSON array of strings, e.g. ["word1", "word2"]`;
+            const aiResponse = await this.aiService.callAI(prompt);
+            // Clean data นิดหน่อยเผื่อ AI แถม Markdown มา
+            const synonyms = JSON.parse(aiResponse.replace(/```json|```/g, '')); 
+            return res.json({ synonyms });
+        } catch (error: any) {
+            return res.status(500).json({ error: "ไม่สามารถหาคำเหมือนได้" });
+        }
+    }
 }

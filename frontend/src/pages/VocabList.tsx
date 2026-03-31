@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, useCallback } from 'react';
 import { useParams } from 'react-router-dom';
-import { Plus, X, Loader2, BookOpen, Trash2, Pencil, Sparkles, Check, Undo2 } from 'lucide-react';
+import { Plus, X, Loader2, BookOpen, Trash2, Pencil, Sparkles, Check, Undo2, Languages } from 'lucide-react';
 import { 
   getVocabs, 
   saveNewVocab, 
@@ -10,6 +10,11 @@ import {
   deleteVocab, 
   generateAIDefinition 
 } from '../services/vocabApi';
+
+const getHeaders = () => ({
+  'Content-Type': 'application/json',
+  'Authorization': `Bearer ${localStorage.getItem('token')}`
+});
 
 const VocabList = () => {
   const { id } = useParams<{ id: string }>();
@@ -153,6 +158,24 @@ const VocabList = () => {
     }
   };
 
+  const handleFindSynonyms = async (word: string) => {
+    setIsProcessing(true);
+    try {
+        // สร้าง API ใหม่ที่ /api/vocab/synonyms โดยใช้ Gemini วิเคราะห์
+        const res = await fetch(`/api/vocab/synonyms`, {
+            method: 'POST',
+            headers: getHeaders(),
+            body: JSON.stringify({ word })
+        });
+        const data = await res.json();
+        alert(`Words related to "${word}": ${data.synonyms.join(', ')}`);
+    } catch (err) {
+        alert("Could not fetch synonyms.");
+    } finally {
+        setIsProcessing(false);
+    }
+  };
+
   return (
     <div className="max-w-6xl mx-auto p-6 space-y-8">
       {/* Quick Add and List Controls */}
@@ -284,6 +307,13 @@ const VocabList = () => {
                           </td>
                         <td className="px-12 py-8 text-right">
                           <div className="flex gap-3 justify-end opacity-0 group-hover:opacity-100 transition-all">
+                            <button 
+                              onClick={() => alert(`Finding synonyms for: ${v.word}`)} // 🎯 ใส่ Logic AI ทีหลังได้ครับ
+                              title="Find Synonyms"
+                              className="p-3 bg-white text-emerald-600 rounded-2xl border border-slate-100 shadow-sm hover:bg-emerald-50 transition-all"
+                            >
+                              <Languages size={20} />
+                            </button>
                             <button onClick={() => startEditing(v)} className="p-3 bg-white text-slate-600 rounded-2xl border border-slate-100 shadow-sm hover:bg-slate-50">
                               <Pencil size={20} />
                             </button>

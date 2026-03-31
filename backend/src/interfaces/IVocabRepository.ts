@@ -26,4 +26,7 @@ export interface IVocabRepository {
     updateVocab(userId: string, itemId: string, data: { definition?: string; listId?: string }): Promise<void>;
     deleteVocab(userId: string, itemId: string): Promise<void>;
     getDueVocabs(userId: string): Promise<any[]>;
+
+    getRandomVocabs(userId: string, limit: number): Promise<any[]>;
+    getVocabsByList(userId: string, listId: string): Promise<any[]>;
 }
