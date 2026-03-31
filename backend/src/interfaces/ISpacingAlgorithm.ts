@@ -9,5 +9,5 @@ export interface ReviewState {
 }
 
 export interface ISpacingAlgorithm {
-    calculateNextReview(state: ReviewState, reting: number): ReviewState;
+    calculateNextReview(state: ReviewState, rating: number): ReviewState;
 }

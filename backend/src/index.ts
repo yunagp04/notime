@@ -1,112 +1,36 @@
 import express from 'express';
 import cors from 'cors';
-import vocabRoutes from './routes/vocabRoutes';
 import path from 'path';
 import fs from 'fs';
-import { SqlVocabRepository } from './repositories/SqlVocabRepository';
+import vocabRoutes from './routes/vocabRoutes';
+import { AuthController } from './controllers/AuthController'; // ✅ Import ให้ถูกตัว
+import { authMiddleware } from "./middlewares/authMiddleware";
 
 const app = express();
-
-const vocabRepo = new SqlVocabRepository();
-
 const port = process.env.PORT || 5000;
+const authCtrl = new AuthController(); // ✅ สร้าง Instance
 
-//Middleware
+// Middleware
 app.use(cors());
 app.use(express.json());
 
-app.use(async (req: any, res: any, next) => {
-    let userEmail = req.headers['x-ms-client-principal-name']; 
-    let providerId = req.headers['x-ms-client-principal-id'];
+// Routes
+app.get("/api/auth/me", authMiddleware, (req, res) => authCtrl.me(req, res)); // ✅ ต่อสายตรงไปที่ AuthController
+app.use('/api/vocab', authMiddleware, vocabRoutes); // ✅ ป้องกันด้วย Middleware
 
-    const isAzure = process.env.WEBSITE_HOSTNAME ? true : false;
-
-    // ถ้า Dev อยู่บนเครื่องตัวเอง ให้ใช้ User สมมติ
-    if (!userEmail && !isAzure) {
-        userEmail = 'yunagp04@gmail.com';
-        providerId = 'local-dev-id-001'; 
-        console.log("🛠️ [Dev Mode] Using Mock User");
-    }
-
-    if (userEmail && providerId) {
-        try {
-            let user = await vocabRepo.getUserByAuthProviderID(providerId); 
-            
-            if (!user) {
-                user = await vocabRepo.registerNewUser({
-                    email: userEmail,
-                    name: userEmail.split('@')[0],
-                    provider: 'google',
-                    providerUserId: providerId
-                });
-                console.log(`✨ Auto-registered: ${userEmail}`);
-            }
-                    
-            // ✨ ไม่ว่าเก่าหรือใหม่ ต้องเซต ID ให้ request เอาไปใช้ต่อ
-            req.userId = user.user_id; 
-
-        } catch (err) {
-            console.error("❌ Auth Middleware Error:", err);
-            }
-        } else if (isAzure) {
-            // 🚩 ถ้าอยู่บน Azure แต่ไม่มี Header (ยังไม่ได้ Login) ถึงค่อยไล่ไป 401
-            return res.status(401).json({ error: "Please log in via Azure" });
-        }
-    next();
-});
-
-// --- API Routing ---
-// ใช้ Middleware ตรวจสอบ userId ก่อนเข้า vocabRoutes แค่ที่เดียวพอ
-app.use('/api/vocab', (req: any, res, next) => {
-    if (!req.userId) {
-        console.log("⚠️ [Unauthorized] No userId found in request");
-        return res.status(401).json({ error: "Unauthorized: ไม่พบข้อมูลผู้ใช้" });
-    }
-    next();
-}, vocabRoutes);
-
-// app.use('/api/vocab', vocabRoutes);
-
-let frontendPath = path.join(process.cwd(), 'frontend/build');
-
-if (!fs.existsSync(path.join(frontendPath, 'index.html'))) {
-    frontendPath = path.join(__dirname, '../../frontend/build');
-}
-
-console.log('📍 Current Working Directory (cwd):', process.cwd());
-console.log('📂 Serving Frontend from:', frontendPath);
-
+// Static Files (Frontend)
+const frontendPath = path.join(process.cwd(), 'frontend/build');
 app.use(express.static(frontendPath));
+
 app.get(/^(?!\/api).+/, (req, res) => {
-    // res.sendFile(path.join(frontendPath, 'index.html'));
     const indexPath = path.join(frontendPath, 'index.html');
     if (fs.existsSync(indexPath)) {
         res.sendFile(indexPath);
     } else {
-        res.status(404).send(`Error: หาไฟล์ index.html ไม่เจอที่ ${indexPath}`);
+        res.status(404).send("Error: Frontend build not found");
     }
 });
 
 app.listen(port, () => {
     console.log(`🚀 Server is flying on port ${port}!`);
-});
-
-// app.listen(port, () => {
-//     // 🌐 เช็คว่าเป็น Azure หรือ Local
-//     const isAzure = process.env.WEBSITE_HOSTNAME ? true : false;
-//     const displayUrl = isAzure 
-//         ? `https://${process.env.WEBSITE_HOSTNAME}` 
-//         : `http://localhost:${port}`;
-
-//     console.log(`🚀 Server is flying!`);
-//     console.log(`📍 Environment: ${isAzure ? 'Azure Cloud' : 'Local Machine'}`);
-//     console.log(`🔗 URL: ${displayUrl}`);
-// });
-
-process.on('unhandledRejection', (reason, promise) => {
-    console.error('❌ Unhandled Rejection at:', promise, 'reason:', reason);
-});
-
-process.on('uncaughtException', (err) => {
-    console.error('❌ Uncaught Exception:', err);
 });

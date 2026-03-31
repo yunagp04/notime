@@ -22,18 +22,25 @@ export class GeminiService implements IAIService {
         });
     }
 
-    /**
-     * ดึงคำแปลและนิยามสั้นๆ จาก Gemini
-     */
-    async getDefinition(word: string): Promise<string> {
+    async getDefinition(word: string, targetLanguage: string = 'Thai', context: string = 'General'): Promise<string> {
         try {
-            const prompt = `Translate the vocabulary "${word}" to Thai, provide a short definition. (Return only the result in Thai, no formatting)`;
+            // และสั่งให้คืนค่าแค่ข้อความเพียวๆ
+            const prompt = `Translate the vocabulary "${word}" to ${targetLanguage}. 
+                            The context is "${context}". 
+                            Provide a concise definition and one short example sentence. 
+                            (Return only the result, no markdown, no extra formatting)`;
+
             const result = await this.model.generateContent(prompt);
             const response = await result.response;
-            return response.text().trim();
+            
+            const text = response.text().trim();
+            // Fallback กรณี AI คืนค่าว่าง
+            return text || "ไม่สามารถดึงข้อมูลได้ในขณะนี้"; 
+
         } catch (error: any) {
-            console.error("Gemini SDK Error (Definition):", error.message);
-            return "ไม่สามารถดึงข้อมูลได้ในขณะนี้";
+            // เปลี่ยนชื่อ Log ให้สื่อความหมายตามสไตล์ใหม่
+            console.error("❌ GeminiService Error (getDefinition):", error.message);
+            return "ไม่สามารถดึงข้อมูลได้ในขณะนี้"; 
         }
     }
 

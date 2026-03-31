@@ -1,9 +1,9 @@
 // NotificationController.ts
 import { Request, Response } from 'express';
-import { IVocabRepository } from '../interfaces/IVocabRepository';
+import { IUserRepository } from '../interfaces/IUserRepository';
 
 export class NotificationController {
-    constructor(private repo: IVocabRepository) {}
+    constructor(private repo: IUserRepository) {}
 
     async subscribe(req: Request, res: Response) {
         const { userId, subscription } = req.body;
