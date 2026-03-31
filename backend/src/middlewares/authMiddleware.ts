@@ -16,15 +16,21 @@ export const authMiddleware = async (req: any, res: Response, next: NextFunction
         if (principal) {
             // AZURE MODE
             const decoded = JSON.parse(Buffer.from(principal as string, "base64").toString("ascii"));
-            providerUserId = decoded.userId;
+            providerUserId = decoded.userId || 
+                    decoded.claims?.find((c: any) => c.typ === "http://schemas.microsoft.com/identity/claims/objectidentifier")?.val ||
+                    decoded.claims?.find((c: any) => c.typ === "oid")?.val ||
+                    decoded.claims?.find((c: any) => c.typ === "sub")?.val;
             email = decoded.userDetails || 
                     decoded.claims?.find((c: any) => c.typ === "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress")?.val ||
                     decoded.claims?.find((c: any) => c.typ === "email")?.val;
             name = decoded.claims?.find((c: any) => c.typ === "name")?.val || email || "Unknown User";
-            if (!email) {
-                console.error("❌ Auth Error: Could not find email in Azure Principal Headers");
-                console.log("🛠️ DEBUG DECODED PAYLOAD:", JSON.stringify(decoded, null, 2)); // พ่นออกมาดูว่าหน้าตาจริงๆ เป็นยังไง
-                return res.status(401).json({ message: "Identity missing: Email required" });
+            if (!providerUserId || !email) {
+                console.error("❌ Auth Error: Missing Identity Data");
+        console.log("🛠️ DEBUG FULL DECODED PAYLOAD:", JSON.stringify(decoded, null, 2));
+        return res.status(401).json({ 
+            message: "Identity missing", 
+            details: { hasId: !!providerUserId, hasEmail: !!email } 
+        });
             }
             provider = "google";
         } else if (!isAzure) {
