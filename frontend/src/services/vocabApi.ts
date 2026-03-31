@@ -1,21 +1,54 @@
 const BASE_URL = "/api/vocab";
 // const USER_ID = "888f10a9-6345-4a8a-99a1-79984863acf1";
 
+const getHeaders = () => ({
+  'Content-Type': 'application/json',
+  'Authorization': `Bearer ${localStorage.getItem('token')}` // ✅ ต้องมีเพื่อให้ Backend รู้ว่าเป็นใคร
+});
+
+export const getDashboardStats = async () => {
+  const response = await fetch(`${BASE_URL}/dashboard`, { headers: getHeaders() });
+  if (!response.ok) {
+     const errorBody = await response.text();
+     console.error("Backend Error Body:", errorBody); // ✅ ช่วยดูว่าหลังบ้านบ่นว่าอะไร
+     throw new Error("Failed to fetch dashboard statistics.");
+  }
+  return response.json();
+};
+
 // Fetch all vocabulary lists for the current user
 export const getLists = async () => {
-  const res = await fetch(`${BASE_URL}/lists`);
+  const res = await fetch(`${BASE_URL}/lists`, { headers: getHeaders() });
   if (!res.ok) throw new Error("Failed to fetch vocabulary lists.");
   return res.json();
 };
 
+export const getDueVocabs = async () => {
+  const response = await fetch(`${BASE_URL}/today`, { headers: getHeaders() }); // ✅ เปลี่ยนจาก /due เป็น /today ให้ตรงหลังบ้าน
+  if (!response.ok) throw new Error("Failed to fetch pending reviews.");
+  return response.json();
+};
+
+
+
+
 // Fetch vocabulary items, optionally filtered by list ID
 export const getVocabs = async (listId?: string) => {
-  const url = listId 
+  const cleanListId = listId?.trim();
+  const url = cleanListId
     ? `${BASE_URL}/items?listId=${listId}`
     : `${BASE_URL}/items`;
 
-  const res = await fetch(url);
-  if (!res.ok) throw new Error("Failed to fetch vocabulary items.");
+  const res = await fetch(url, {
+    method: 'GET',
+    headers: getHeaders()
+  });
+  
+  if (!res.ok) {
+    const errorMsg = await res.text();
+     console.error("Backend Error Detail:", errorMsg);
+     throw new Error("Failed to fetch vocabulary items.");
+  }
   return res.json();
 };
 
@@ -42,22 +75,28 @@ export const saveNewVocab = async (data: {
 };
 
 // Update an existing vocabulary item's details
-export const updateVocab = async (id: string, data: { word: string, definition: string }) => {
-  const res = await fetch(`${BASE_URL}/${id}`, {
-    method: 'PUT',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(data),
-  });
-  if (!res.ok) throw new Error("Failed to update vocabulary item.");
-  return res.json();
+export const updateVocab = async (itemId: string, data: { word: string, definition: string, listId?: string }) => {
+    const res = await fetch(`${BASE_URL}/items/${itemId}`, {
+        method: 'PUT',
+        headers: getHeaders(),
+        body: JSON.stringify(data),
+    });
+    if (!res.ok) throw new Error("Failed to update vocabulary item.");
+    return res.json();
 };
 
 // Remove a vocabulary item by ID
 export const deleteVocab = async (id: string) => {
-  const res = await fetch(`${BASE_URL}/${id}`, {
+  const res = await fetch(`${BASE_URL}/items/${id}`, { 
     method: 'DELETE',
+    headers: getHeaders()
   });
-  if (!res.ok) throw new Error("Failed to delete vocabulary item.");
+  
+  if (!res.ok) {
+    const errorMsg = await res.text();
+    console.error("Delete Error:", errorMsg);
+    throw new Error("Failed to delete vocabulary item.");
+  }
   return res.json();
 };
 
@@ -74,11 +113,11 @@ export const generateAIDefinition = async (word: string) => {
 };
 
 // Fetch general dashboard statistics
-export const getDashboardStats = async () => {
-  const response = await fetch(`${BASE_URL}/dashboard`);
-  if (!response.ok) throw new Error("Failed to fetch dashboard statistics.");
-  return response.json();
-};
+// export const getDashboardStats = async () => {
+//   const response = await fetch(`${BASE_URL}/dashboard`);
+//   if (!response.ok) throw new Error("Failed to fetch dashboard statistics.");
+//   return response.json();
+// };
 
 // Fetch summary metrics including learning progress and history
 export const getSummary = async () => {
@@ -88,11 +127,11 @@ export const getSummary = async () => {
 };
 
 // Fetch vocabulary items that are due for review today
-export const getDueVocabs = async () => {
-  const response = await fetch(`${BASE_URL}/due`);
-  if (!response.ok) throw new Error("Failed to fetch pending reviews.");
-  return response.json();
-};
+// export const getDueVocabs = async () => {
+//   const response = await fetch(`${BASE_URL}/today`); 
+//   if (!response.ok) throw new Error("Failed to fetch pending reviews.");
+//   return response.json();
+// };
 
 // Submit a review result for an item
 export const submitReview = async (data: { 
@@ -106,5 +145,17 @@ export const submitReview = async (data: {
     body: JSON.stringify(data),
   });
   if (!res.ok) throw new Error("Failed to submit review record.");
+  return res.json();
+};
+
+export const subscribePush = async (subscription: any) => {
+  const res = await fetch(`${BASE_URL}/subscribe`, {
+    method: 'POST',
+    headers: { 
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${localStorage.getItem('token')}`
+    },
+    body: JSON.stringify({ subscription }),
+  });
   return res.json();
 };

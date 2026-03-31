@@ -18,7 +18,8 @@ const ReviewPage = () => {
     const loadCards = async () => {
       try {
         const data = await getDueVocabs();
-        const actualItems = data.items || [];
+        const actualItems = Array.isArray(data) ? data : (data.items || []);
+        // const actualItems = data.items || [];
         setCards(actualItems);
       } catch (err) {
         console.error("Failed to load review cards:", err);

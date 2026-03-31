@@ -30,11 +30,12 @@ const VocabList = () => {
 
   // Fetch vocabulary items from the database
   const loadData = useCallback(async (showSilent = false) => {
-    if (!id) return;
+    if (!id || id === "undefined") return;
     if (!showSilent) setIsLoading(true);
     try {
       const data = await getVocabs(id);
       const actualData = Array.isArray(data) ? data : (data.items || []);
+      console.log("📦 Received Vocabs:", actualData);
       setVocabs(actualData);
     } catch (err) {
       console.error("Failed to fetch vocabulary items:", err);
@@ -69,7 +70,7 @@ const VocabList = () => {
 
       setBulkInput("");
       setBulkDefinition("");
-      loadData();
+      loadData(true);
     } catch (err) {
       alert("Some items could not be added. Please check your connection.");
     } finally {
@@ -79,23 +80,22 @@ const VocabList = () => {
 
   // Save a single item via modal
   const handleModalSave = async () => {
-    if (!newWord.word.trim()) return alert("Please enter a word.");
-    
+    if (!newWord.word.trim()) return;
     setIsProcessing(true);
     try {
       await saveNewVocab({
         word: newWord.word.trim(),
         definition: newWord.definition.trim(),
         listId: id || "",
-        userId: "888f10a9-6345-4a8a-99a1-79984863acf1",
-        skipAI: !isAutoAI
+        skipAI: newWord.definition.trim() !== "" 
       });
-      
-      setNewWord({ word: '', definition: '' });
+
       setIsModalOpen(false);
-      loadData(true);
+      setNewWord({ word: '', definition: '' });
+      // ✅ ใส่ true เพื่อให้โหลดข้อมูลใหม่แบบ "หน้าไม่เด้ง"
+      await loadData(true); 
     } catch (err) {
-      alert("Failed to save the entry.");
+      console.error(err);
     } finally {
       setIsProcessing(false);
     }
@@ -106,7 +106,7 @@ const VocabList = () => {
     if (!window.confirm("Are you sure you want to delete this item?")) return;
     try {
       await deleteVocab(vocabId);
-      loadData();
+      loadData(true);
     } catch (err) {
       alert("Failed to delete the item.");
     }
@@ -118,7 +118,7 @@ const VocabList = () => {
       const aiDef = await generateAIDefinition(word);
       if (aiDef) {
         await updateVocab(vocabId, { word, definition: aiDef });
-        loadData();
+        loadData(true);
       }
     } catch (err) {
       alert("AI could not generate a definition for this word.");
@@ -146,7 +146,7 @@ const VocabList = () => {
       });
 
       setEditingId(null);
-      loadData();
+      loadData(true);
     } catch (err) {
       console.error("Update failed:", err);
       alert("Could not update the entry.");
@@ -256,16 +256,32 @@ const VocabList = () => {
                         <td className="px-12 py-8 font-black text-2xl text-slate-800">{v.word}</td>
                         <td className="px-12 py-8">
                           {v.definition ? (
-                            <span className="text-slate-600 font-medium text-lg leading-relaxed">{v.definition}</span>
-                          ) : (
-                            <button 
-                              onClick={() => handleRowGenAI(v.id, v.word)}
-                              className="flex items-center gap-2 text-indigo-500 font-bold bg-indigo-50 px-5 py-2 rounded-xl hover:bg-indigo-100 transition-all"
-                            >
-                              <Sparkles size={16} /> Generate ✨
-                            </button>
-                          )}
-                        </td>
+                            <div className="flex flex-col"> {/* 👈 เพิ่ม div ครอบเพื่อให้จัดบรรทัดได้ */}
+                              <span className="text-slate-600 font-medium text-lg leading-relaxed">
+                                {v.definition}
+                              </span>
+                              
+                              {/* ✅ เพิ่มส่วนแสดงวันที่ทบทวนถัดไปตรงนี้ครับ */}
+                              <div className="mt-2 flex items-center gap-2 text-xs font-bold uppercase tracking-wider">
+                                <span className="text-slate-400">Next Review:</span>
+                                <span className={v.nextReview ? "text-indigo-500" : "text-amber-500"}>
+                                  {v.nextReview 
+                                    ? new Date(v.nextReview).toLocaleDateString('th-TH', { 
+                                        year: 'numeric', month: 'short', day: 'numeric' 
+                                      }) 
+                                    : "Pending..."}
+                                </span>
+                              </div>
+                            </div>
+                            ) : (
+                              <button 
+                                onClick={() => handleRowGenAI(v.id, v.word)}
+                                className="flex items-center gap-2 text-indigo-500 font-bold bg-indigo-50 px-5 py-2 rounded-xl hover:bg-indigo-100 transition-all"
+                              >
+                                <Sparkles size={16} /> Generate ✨
+                              </button>
+                            )}
+                          </td>
                         <td className="px-12 py-8 text-right">
                           <div className="flex gap-3 justify-end opacity-0 group-hover:opacity-100 transition-all">
                             <button onClick={() => startEditing(v)} className="p-3 bg-white text-slate-600 rounded-2xl border border-slate-100 shadow-sm hover:bg-slate-50">

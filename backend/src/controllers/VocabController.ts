@@ -2,10 +2,12 @@ import { Request, Response } from 'express';
 import { IVocabRepository } from '../interfaces/IVocabRepository';
 import { IAIService } from '../interfaces/IAIService';
 import { ISpacingAlgorithm } from '../interfaces/ISpacingAlgorithm';
+import { IListRepository } from '../interfaces/IListRepository';
 
 export class VocabController {
     constructor(
         private repo: IVocabRepository, 
+        private listRepo: IListRepository,
         private aiService: IAIService,
         private spacingAlgo: ISpacingAlgorithm
     ) {
@@ -16,19 +18,24 @@ export class VocabController {
      * 🆕 เพิ่มคำศัพท์แบบ Smart Add (Global Cache)
      */
     async create(req: any, res: Response) {
-        const { word, listId, skipAI, definition: userDef } = req.body;
+        let { word, listId, skipAI, definition: userDef } = req.body;
         const userId = req.userId;
 
-        if (!word || !listId || !userId) {
-            return res.status(400).json({ error: "ข้อมูลไม่ครบถ้วน (word, listId)" });
-        }
-
-        const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
-        if (!uuidRegex.test(listId)) {
-            return res.status(400).json({ error: "รูปแบบ listId ไม่ถูกต้อง (Invalid GUID)" });
+        if (!word || !userId) {
+            return res.status(400).json({ error: "ข้อมูลไม่ครบถ้วน (word)" });
         }
 
         try {
+
+            if (!listId) {
+                listId = await this.listRepo.getOrCreateDefaultList(userId);
+            }
+
+            const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+            if (!uuidRegex.test(listId)) {
+                return res.status(400).json({ error: "รูปแบบ listId ไม่ถูกต้อง" });
+            }
+            
             // 1. เช็คคลังกลางก่อน (Global Cache)
             let globalItem = await this.repo.findGlobalItem(word);
             let itemId: string;
@@ -130,6 +137,7 @@ export class VocabController {
     }
 
     async getDashboard(req: any, res: Response) {
+        console.log("🔍 Fetching dashboard for User:", req.userId);
         const userId = req.userId;
         try {
             const [summary, history] = await Promise.all([

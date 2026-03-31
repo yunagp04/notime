@@ -6,6 +6,8 @@ import vocabRoutes from './routes/vocabRoutes';
 import { AuthController } from './controllers/AuthController'; // ✅ Import ให้ถูกตัว
 import { authMiddleware } from "./middlewares/authMiddleware";
 
+import './workers/NotificationWorker';
+
 const app = express();
 const port = process.env.PORT || 5000;
 const authCtrl = new AuthController(); // ✅ สร้าง Instance

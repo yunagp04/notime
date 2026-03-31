@@ -8,6 +8,7 @@ import { NotificationController } from '../controllers/NotificationController';
 import { SqlVocabRepository } from '../repositories/SqlVocabRepository';
 import { SqlListRepository } from '../repositories/SqlListRepository';
 import { SqlUserRepository } from '../repositories/SqlUserRepository';
+import { SqlNotificationRepository } from '../repositories/SqlNotificationRepository';
 
 // Services & Managers
 import { GeminiService } from '../services/GeminiService';
@@ -20,6 +21,7 @@ const router = Router();
 const vocabRepo = new SqlVocabRepository(); 
 const listRepo = new SqlListRepository();
 const userRepo = new SqlUserRepository();
+const notiRepo = new SqlNotificationRepository();
 
 // create  Services/Algorithms Repositories instance
 const aiService = new GeminiService();
@@ -29,10 +31,10 @@ const sm2 = new SM2Algorithm();
 const practiceSession = new PracticeSession(vocabRepo, sm2);
 
 // (Dependency Injection)
-const vocabCtrl = new VocabController(vocabRepo, aiService, sm2);
+const vocabCtrl = new VocabController(vocabRepo, listRepo, aiService, sm2);
 const listCtrl = new ListController(listRepo);
 const practiceCtrl = new PracticeController(vocabRepo, practiceSession);
-const notiCtrl = new NotificationController(userRepo); // ✅ ใช้ userRepo ตามที่เราแก้ล่าสุด
+const notiCtrl = new NotificationController(notiRepo); // ✅ ใช้ notiRepo ตามที่เราแก้ล่าสุด
 
 // --- (Routes) ---
 
@@ -51,14 +53,15 @@ router.post("/add", (req, res) => vocabCtrl.create(req, res));
 router.get("/search", (req, res) => vocabCtrl.search(req, res));
 router.get("/state/:id", (req, res) => vocabCtrl.getState(req, res));
 router.put("/items/:id", (req, res) => vocabCtrl.update(req, res));
-router.delete("/:id", (req, res) => vocabCtrl.delete(req, res));
+router.delete("/items/:id", (req, res) => vocabCtrl.delete(req, res));
+router.post("/generate-definition", (req, res) => vocabCtrl.generateOnly(req, res));
 
 // Spaced Repetition (Practice)
 router.get("/today", (req, res) => practiceCtrl.getTodayTasks(req, res));
-router.post("/review", (req, res) => vocabCtrl.review(req, res)); // ✅ ใช้จาก vocabCtrl หรือ practiceCtrl ก็ได้แต่ต้องตรงกัน
+router.post("/review", (req, res) => vocabCtrl.review(req, res));
 
 // Notifications
-router.post("/subscribe", (req, res) => notiCtrl.subscribe(req, res)); // ✅ เพิ่มเส้นทางแจ้งเตือน
+router.post("/subscribe", (req, res) => notiCtrl.subscribe(req, res));
 
-
+export { vocabRepo, notiRepo };
 export default router;

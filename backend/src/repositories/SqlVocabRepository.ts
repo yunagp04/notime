@@ -70,12 +70,25 @@ export class SqlVocabRepository implements IVocabRepository {
         const req = await this.request;
         req.input('userId', sql.UniqueIdentifier, userId);
         
-        let query = `SELECT * FROM v_UserLearningItems WHERE user_id = @userId`;
+        let query = `
+            SELECT 
+                li.learning_item_id, 
+                li.title as word, 
+                ISNULL(uli.custom_definition, li.content) as definition,
+                uli.list_id,
+                rs.difficulty,
+                rs.next_review_at
+            FROM UserLearningItem uli
+            JOIN LearningItem li ON uli.learning_item_id = li.learning_item_id
+            LEFT JOIN ReviewState rs ON uli.learning_item_id = rs.learning_item_id AND uli.user_id = rs.user_id
+            WHERE uli.user_id = @userId
+        `;
+
         if (listId) {
             req.input('listId', sql.UniqueIdentifier, listId);
-            query += ` AND list_id = @listId`;
+            query += ` AND uli.list_id = @listId`;
         }
-        query += ` ORDER BY word ASC`;
+        query += ` ORDER BY li.title ASC`;
 
         const result = await req.query(query);
         return result.recordset.map(row => ({
@@ -87,23 +100,31 @@ export class SqlVocabRepository implements IVocabRepository {
         }));
     }
 
-    async getVocabs(userId: string): Promise<any[]> {
+    async getVocabs(userId: string, listId?: string): Promise<any[]> {
         const req = await this.request;
-        const result = await req
-            .input('userId', sql.UniqueIdentifier, userId)
-            .query(`
-                SELECT 
-                    uli.learning_item_id as id,
-                    li.title as word,
-                    ISNULL(uli.custom_definition, li.definition) as definition,
-                    ul.list_name,
-                    uli.added_at
-                FROM UserLearningItem uli
-                JOIN LearningItem li ON uli.learning_item_id = li.learning_item_id
-                JOIN UserList ul ON uli.list_id = ul.list_id
-                WHERE uli.user_id = @userId
-                ORDER BY uli.added_at DESC
-            `);
+        req.input('userId', sql.UniqueIdentifier, userId);
+        
+        let query = `
+            SELECT 
+                uli.learning_item_id as id,
+                li.title as word,
+                ISNULL(uli.custom_definition, li.content) as definition,
+                ul.list_name,
+                uli.added_at
+            FROM UserLearningItem uli
+            JOIN LearningItem li ON uli.learning_item_id = li.learning_item_id
+            JOIN UserList ul ON uli.list_id = ul.list_id
+            WHERE uli.user_id = @userId
+        `;
+
+        if (listId) {
+            req.input('listId', sql.UniqueIdentifier, listId);
+            query += ` AND uli.list_id = @listId`;
+        }
+
+        query += ` ORDER BY uli.added_at DESC`;
+
+        const result = await req.query(query);
         return result.recordset;
     }
 
@@ -245,8 +266,17 @@ export class SqlVocabRepository implements IVocabRepository {
         const req = await this.request;
         const result = await req
             .input('userId', sql.UniqueIdentifier, userId)
-            .query(`SELECT * FROM v_UserLearningItems 
-                    WHERE user_id = @userId AND next_review_at <= GETUTCDATE()`);
+            .query(`
+                SELECT 
+                    rs.learning_item_id as id,
+                    li.title as title,
+                    ISNULL(uli.custom_definition, li.content) as content
+                FROM ReviewState rs
+                JOIN LearningItem li ON rs.learning_item_id = li.learning_item_id
+                JOIN UserLearningItem uli ON rs.learning_item_id = uli.learning_item_id AND rs.user_id = uli.user_id
+                WHERE rs.user_id = @userId 
+                AND rs.next_review_at <= DATEADD(day, 1, CAST(GETUTCDATE() AS DATE))
+        `);
         return result.recordset;
     }
 
