@@ -25,6 +25,8 @@ jobs:
 
       - name: Build Frontend
         run: |
+          env:
+            REACT_APP_VAPID_PUBLIC_KEY: ${{ secrets.REACT_APP_VAPID_PUBLIC_KEY }}
           cd frontend
           npm install
           npm run build
