@@ -6,6 +6,7 @@ import Dashboard from "./pages/Dashboard";
 import VocabPage from "./pages/VocabPage";
 import VocabList from "./pages/VocabList";
 import ReviewPage from './pages/ReviewPage';
+import Settings from './pages/Settings';
 
 // Navigation button to return to the main dashboard
 const GlobalBackButton = () => {
@@ -66,6 +67,7 @@ function App() {
         <Route path="/vocab" element={<VocabPage />} />
         <Route path="/vocab/:id" element={<VocabList />} />
         <Route path="/review" element={<ReviewPage />} />
+        <Route path="/settings" element={<Settings />} />
       </Routes>
     </BrowserRouter>
   );

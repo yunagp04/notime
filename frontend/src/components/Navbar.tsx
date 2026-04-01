@@ -1,6 +1,8 @@
 import React, { useState } from 'react'; // 🚩 เพิ่ม React และ useState
 import { Link, useLocation } from 'react-router-dom';
 import { LayoutDashboard, Library, PlusCircle, X, LucideIcon } from 'lucide-react'; // 🚩 เพิ่ม X และ LucideIcon type
+import { Settings as SettingsIcon } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 
 // 🚩 กำหนด Interface สำหรับ Navigation Item
 interface NavItem {
@@ -8,9 +10,9 @@ interface NavItem {
   label: string;
   icon: LucideIcon;
 }
-
 const Navbar: React.FC = () => {
   const location = useLocation();
+  const navigate = useNavigate();
   
   // 🚩 State management
   const [isOpen, setIsOpen] = useState<boolean>(false);
@@ -90,6 +92,10 @@ const Navbar: React.FC = () => {
         >
           <PlusCircle size={18} />
           New Word
+        </button>
+        <button onClick={() => navigate('/settings')} className="flex items-center gap-3 p-4 hover:bg-slate-100 rounded-2xl">
+          <SettingsIcon size={20} />
+          <span className="font-bold">Settings</span>
         </button>
       </div>
 
