@@ -1,13 +1,13 @@
 // src/pages/Settings.jsx
 // frontend/src/pages/Settings.tsx
-import React, { useState, useEffect } from 'react';
-import { Bell, Globe, Save, ShieldCheck } from 'lucide-react';
+import React, { useState } from 'react';
+import { Bell, Globe, Save } from 'lucide-react';
 import { setupNotifications } from '../services/pushNotification';
 
 const Settings = () => {
-  const [isNotifEnabled, setIsNotifEnabled] = useState(false);
   const [targetLang, setTargetLang] = useState('th');
   const [notiMode, setNotiMode] = useState('all');
+
 
   const handleSaveSettings = async () => {
     // 🎯 ส่งค่า mode, targetLang ไปบันทึกที่ /api/vocab/settings/notifications
