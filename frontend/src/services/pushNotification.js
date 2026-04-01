@@ -1,12 +1,27 @@
-// pushNotification.js
+// src/services/pushNotification.js
+
+// ✅ 1. ต้องมีฟังก์ชันนี้วางไว้ด้านบนสุดของไฟล์เสมอ
+function urlBase64ToUint8Array(base64String) {
+    if (!base64String) {
+        throw new Error("VAPID public key is missing or empty.");
+    }
+    const padding = '='.repeat((4 - base64String.length % 4) % 4);
+    const base64 = (base64String + padding).replace(/-/g, '+').replace(/_/g, '/');
+    const rawData = window.atob(base64);
+    const outputArray = new Uint8Array(rawData.length);
+    for (let i = 0; i < rawData.length; ++i) {
+        outputArray[i] = rawData.charCodeAt(i);
+    }
+    return outputArray;
+}
+
 export const setupNotifications = async () => {
     if ('serviceWorker' in navigator && 'PushManager' in window) {
         try {
-            // 🎯 ใช้ REACT_APP_ เท่านั้นสำหรับ Create React App
             const vapidPublicKey = process.env.REACT_APP_VAPID_PUBLIC_KEY;
 
             if (!vapidPublicKey) {
-                console.error("❌ ไม่พบ REACT_APP_VAPID_PUBLIC_KEY ใน Env");
+                console.error("❌ ไม่พบ REACT_APP_VAPID_PUBLIC_KEY ใน Environment Variables");
                 return;
             }
 
@@ -20,8 +35,7 @@ export const setupNotifications = async () => {
 
             const subscription = await registration.pushManager.subscribe(subscribeOptions);
 
-            // ส่ง Subscription ไปที่ Backend
-            await fetch('/api/vocab/subscribe', {
+            const response = await fetch('/api/vocab/subscribe', {
                 method: 'POST',
                 headers: { 
                     'Content-Type': 'application/json',
@@ -30,9 +44,11 @@ export const setupNotifications = async () => {
                 body: JSON.stringify({ subscription })
             });
 
-            console.log('🚀 ยินดีด้วยคุณ Paweena! ลงทะเบียนแจ้งเตือนสำเร็จแล้ว');
+            if (!response.ok) throw new Error(`Server error: ${response.status}`);
+
+            console.log('🚀 บันทึก Subscription ลงฐานข้อมูลสำเร็จแล้ว!');
         } catch (error) {
-            console.error('❌ พังตรงนี้:', error.message);
+            console.error('❌ แจ้งเตือนพังเพราะ:', error.message);
         }
     }
 };
