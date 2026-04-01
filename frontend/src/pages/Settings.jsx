@@ -33,20 +33,18 @@ const Settings = () => {
 
       {/* Notification Section */}
       <section className="bg-white p-8 rounded-[32px] shadow-sm border border-slate-100 space-y-6">
-        <div className="flex items-center gap-3 text-xl font-bold text-slate-800">
-          <Bell className="text-indigo-600" /> Notifications
-        </div>
-        <div className="flex items-center justify-between p-4 bg-slate-50 rounded-2xl">
-          <div>
-            <p className="font-bold text-slate-700">Push Notifications</p>
-            <p className="text-sm text-slate-500">รับแจ้งเตือนเมื่อถึงเวลาทบทวน</p>
-          </div>
-          <button 
-            onClick={setupNotifications} 
-            className="px-6 py-2 bg-indigo-600 text-white rounded-xl font-bold hover:bg-slate-900 transition-all"
-          >
-            Enable
-          </button>
+        <div className="space-y-3 p-4 bg-slate-50 rounded-2xl">
+        <label className="block font-bold text-slate-700">Notification Mode</label>
+        <select 
+            value={notiMode} 
+            onChange={(e) => setNotiMode(e.target.value)} // 🎯 เรียกใช้ setNotiMode ตรงนี้ หายแดงแน่นอน!
+            className="w-full p-3 bg-white border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none font-medium"
+        >
+            <option value="all">All Words (ทบทวนทั้งหมด)</option>
+            <option value="random">Random (สุ่มคำศัพท์)</option>
+            <option value="list">By List (ตามลิสต์ที่เลือก)</option>
+        </select>
+        <p className="text-xs text-slate-400">เลือกรูปแบบการส่งคำศัพท์ไปแจ้งเตือนในแต่ละรอบ</p>
         </div>
       </section>
 
