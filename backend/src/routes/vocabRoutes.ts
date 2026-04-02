@@ -1,14 +1,21 @@
 import { Router } from 'express';
+
+import { supabase } from '../config/supabaseClient';
+
 import { VocabController } from '../controllers/VocabController';
 import { PracticeController } from '../controllers/PracticeController';
 import { ListController } from '../controllers/ListController';
 import { NotificationController } from '../controllers/NotificationController';
 
 // Repositories
-import { SqlVocabRepository } from '../repositories/SqlVocabRepository';
-import { SqlListRepository } from '../repositories/SqlListRepository';
-import { SqlUserRepository } from '../repositories/SqlUserRepository';
-import { SqlNotificationRepository } from '../repositories/SqlNotificationRepository';
+// import { SqlVocabRepository } from '../repositories/SqlVocabRepository';
+// import { SqlListRepository } from '../repositories/SqlListRepository';
+// import { SqlUserRepository } from '../repositories/SqlUserRepository';
+// import { SqlNotificationRepository } from '../repositories/SqlNotificationRepository';
+import { PostgresNotificationRepository } from '../repositories/PostgresNotificationRepository';
+import { PostgresVocabRepository } from '../repositories/PostgresVocabRepository';
+import { PostgresListRepository } from '../repositories/PostgresListRepository';
+import { PostgresUserRepository } from '../repositories/PostgresUserRepository';
 
 // Services & Managers
 import { GeminiService } from '../services/GeminiService';
@@ -18,10 +25,10 @@ import { SM2Algorithm } from '../algorithms/SM2Algorithm';
 const router = Router();
 
 // create Repositories instance
-const vocabRepo = new SqlVocabRepository(); 
-const listRepo = new SqlListRepository();
-const userRepo = new SqlUserRepository();
-const notiRepo = new SqlNotificationRepository();
+const vocabRepo = new PostgresVocabRepository(supabase);
+const listRepo = new PostgresListRepository(supabase);
+const userRepo = new PostgresUserRepository(supabase);
+const notiRepo = new PostgresNotificationRepository(supabase);
 
 // create  Services/Algorithms Repositories instance
 const aiService = new GeminiService();
@@ -72,6 +79,6 @@ router.get("/practice/list/:listId", (req, res) => vocabCtrl.getPracticeByList(r
 router.post("/subscribe", (req, res) => notiCtrl.subscribe(req, res));
 router.post("/subscribe", (req, res) => notiCtrl.subscribe(req, res)); // ลงทะเบียน Browser
 router.post("/settings/notifications", (req, res) => notiCtrl.updateSettings(req, res)); // 🆕 บันทึกโหมด (All/Random/List)
-
+router.get('/process-worker', (req, res) => notiCtrl.triggerWorker(req, res));
 export { vocabRepo, notiRepo };
 export default router;

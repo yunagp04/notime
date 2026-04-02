@@ -1,4 +1,5 @@
-const BASE_URL = "/api/vocab";
+const API_ROOT = import.meta.env.VITE_API_BASE_URL || "";
+const BASE_URL = `${API_ROOT}/api/vocab`;
 // const USER_ID = "888f10a9-6345-4a8a-99a1-79984863acf1";
 
 const getHeaders = () => ({
@@ -62,7 +63,7 @@ export const saveNewVocab = async (data: {
 }) => {
   const res = await fetch(`${BASE_URL}/add`, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    headers: getHeaders(),
     body: JSON.stringify(data),
   });
 
@@ -104,7 +105,7 @@ export const deleteVocab = async (id: string) => {
 export const generateAIDefinition = async (word: string) => {
   const res = await fetch(`${BASE_URL}/generate-definition`, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    headers: getHeaders(),
     body: JSON.stringify({ word }),
   });
   if (!res.ok) throw new Error("AI service is currently unavailable.");
@@ -127,7 +128,7 @@ export const submitReview = async (data: {
 }) => {
   const res = await fetch(`${BASE_URL}/review`, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+  headers: getHeaders(),
     body: JSON.stringify(data),
   });
   if (!res.ok) throw new Error("Failed to submit review record.");
@@ -137,10 +138,7 @@ export const submitReview = async (data: {
 export const subscribePush = async (subscription: any) => {
   const res = await fetch(`${BASE_URL}/subscribe`, {
     method: 'POST',
-    headers: { 
-      'Content-Type': 'application/json',
-      'Authorization': `Bearer ${localStorage.getItem('token')}`
-    },
+    headers: getHeaders(),
     body: JSON.stringify({ subscription }),
   });
   return res.json();

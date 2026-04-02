@@ -119,30 +119,27 @@ export class SqlNotificationRepository implements INotificationRepository {
     }
 
     async addToQueue(userId: string, itemId: string | null, scheduledAt: Date, message?: string): Promise<void> {
-        const req = await this.getRequest();
-        // 🎯 เพิ่มการเช็ค: ถ้ามี User คนนี้รออยู่ใน Queue สถานะ pending แล้ว "ห้ามเพิ่มซ้ำ"
-        const checkQuery = `
-            SELECT 1 FROM NotificationQueue 
-            WHERE user_id = @userId AND status = 'pending'
-        `;
+        const pool = await poolPromise;
+        const checkReq = pool.request(); // 🎯 แยก Request สำหรับเช็ค
         
-        const existing = await req
+        const existing = await checkReq
             .input('userId', sql.UniqueIdentifier, userId)
-            .query(checkQuery);
+            .query(`SELECT 1 FROM NotificationQueue WHERE user_id = @userId AND status = 'pending'`);
 
         if (existing.recordset.length > 0) {
             console.log(`⚠️ Skip: User ${userId} already has a pending notification.`);
             return;
         }
-        
-        await req
+
+        const insertReq = pool.request(); // 🎯 แยก Request สำหรับ INSERT
+        await insertReq
             .input('id', sql.UniqueIdentifier, uuidv4())
-            .input('userId', sql.UniqueIdentifier, userId)
+            .input('uid', sql.UniqueIdentifier, userId) // ใช้ชื่อ parameter ต่างกันก็ได้เพื่อความชัวร์
             .input('itemId', sql.UniqueIdentifier, itemId)
             .input('scheduled', sql.DateTime, scheduledAt)
-            .input('message', sql.NVarChar, message || 'ได้เวลาทบทวนศัพท์แล้ว!')
+            .input('msg', sql.NVarChar, message)
             .query(`INSERT INTO NotificationQueue (queue_id, user_id, learning_item_id, scheduled_at, status, custom_message, created_at)
-                    VALUES (@id, @userId, @itemId, @scheduled, 'pending', @message, GETDATE())`);
+                    VALUES (@id, @uid, @itemId, @scheduled, 'pending', @msg, GETDATE())`);
     }
 
     async updateNotificationSettings(userId: string, settings: any): Promise<void> {
@@ -159,5 +156,20 @@ export class SqlNotificationRepository implements INotificationRepository {
                     max_items_per_notif = @maxItems 
                 WHERE user_id = @userId
             `);
+    }
+
+    async getUsersByNotiTime(timeStr: string): Promise<any[]> {
+        const req = await this.getRequest();
+        const result = await req.input('t', sql.NVarChar, timeStr)
+            .query(`SELECT user_id, noti_mode, noti_list_id, max_items_per_notif, pref_lang 
+                    FROM [User] WHERE noti_time = @t`);
+        return result.recordset;
+    }
+
+    async getTemplate(key: string, lang: string): Promise<any> {
+        const req = await this.getRequest();
+        const result = await req.input('k', sql.NVarChar, key).input('l', sql.NVarChar, lang)
+            .query(`SELECT title_template, body_template FROM NotificationTemplates WHERE template_key = @k AND lang_code = @l`);
+        return result.recordset[0] || { title_template: 'Review!', body_template: '{count} words due' };
     }
 }

@@ -5,5 +5,5 @@ export interface AuthUserData {
 }
 
 export interface IAuthStrategy {
-    getUserInfo(requestSource: any): AuthUserData | null;
+    getUserInfo(headers: any): Promise<AuthUserData | null>;
 }
