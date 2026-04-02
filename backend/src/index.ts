@@ -9,7 +9,7 @@ import { authMiddleware } from "./middlewares/authMiddleware";
 import './workers/NotificationWorker';
 
 const app = express();
-const port = process.env.PORT || 5000;
+const port = Number(process.env.PORT) || 3001;
 
 // 1. สร้าง Instance ของ Controller ก่อนเรียกใช้งาน
 const authCtrl = new AuthController(); 
@@ -47,6 +47,6 @@ app.get(/^(?!\/api).+/, (req, res) => {
     }
 });
 
-app.listen(port, () => {
+app.listen(port, '0.0.0.0', () => {
     console.log(`🚀 Server is flying on port ${port}!`);
 });
