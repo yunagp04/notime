@@ -42,28 +42,38 @@ cron.schedule('*/30 * * * *', async () => {
 // 🎯 2. ส่วนส่งแจ้งเตือนจริง (Pusher - แบบ Grouping เหมือนอีเมล)
 cron.schedule('* */1 * * *', async () => {
     const pending = await notiRepo.getPendingQueue();
-    const frontendUrl = process.env.FRONTEND_URL;
+    const frontendUrl = process.env.FRONTEND_URL || 'https://vocab-frontend.onrender.com'; // Fallback ไว้กันเหนียว
 
     for (const task of pending) {
-        const sub = { endpoint: task.endpoint, keys: { p256dh: task.p256dh_key, auth: task.auth_key } };
+        const sub = { 
+            endpoint: task.pushsubscription_s?.endpoint, // เช็คโครงสร้าง Object ให้ตรงกับที่ Repo คืนค่ามา
+            keys: { 
+                p256dh: task.pushsubscription_s?.p256dh_key, 
+                auth: task.pushsubscription_s?.auth_key 
+            } 
+        };
         
         try {
-            // 🎯 1. ดึง Template ตามภาษา User มาทำ "หัวข้อ" (Title)
-            const temp = await notiRepo.getTemplate('due_reminder', task.pref_lang || 'th');
+            // 🚩 1. ลบบรรทัดที่เรียก getTemplate ออก แล้วใช้ตัวแปร String ธรรมดาแทนครับ
+            const titlePrefix = "ได้เวลาทบทวนแล้ว!"; 
             
-            // 🎯 2. ดึงคำศัพท์มาโชว์ 5 คำ (เพื่อส่งแยกบรรทัด/Grouping)
+            // 🎯 2. ดึงคำศัพท์มาโชว์ 5 คำ
             const items = await notiRepo.getWordsForNotification(task.user_id, task.noti_mode, task.noti_list_id, 5);
 
             for (const item of items) {
                 const payload = JSON.stringify({
-                    title: `${temp.title_template}: ${item.title || item.word}`, // "ได้เวลาทบทวนแล้ว!: Abandon"
-                    body: `ความหมาย: ${item.content || item.definition || 'กดเพื่อดูรายละเอียด'}`,
-                    tag: 'srs-review-group', // 🎯 ตัวรวมกลุ่มให้เป็น Stack หลายบรรทัด
+                    // 🚩 เปลี่ยนจาก temp.title_template มาใช้ titlePrefix ที่เราตั้งไว้ข้างบน
+                    title: `${titlePrefix}: ${item.globalvocab_m?.title || item.title || 'คำศัพท์ใหม่'}`, 
+                    body: `ความหมาย: ${item.globalvocab_m?.content || item.definition || 'กดเพื่อดูรายละเอียด'}`,
+                    tag: 'srs-review-group', 
                     url: `${frontendUrl}/practice`
                 });
                 await sendPush(sub, payload);
             }
             await notiRepo.updateQueueStatus(task.queue_id, 'sent');
-        } catch (err: any) { /* cleanup logic ... */ }
+        } catch (err: any) {
+             console.error("❌ Send Push Error:", err.message);
+             await notiRepo.updateQueueStatus(task.queue_id, 'failed');
+        }
     }
 });
