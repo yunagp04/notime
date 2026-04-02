@@ -64,7 +64,7 @@ export class SqlNotificationRepository implements INotificationRepository {
                         SELECT TOP (@max) learning_item_id 
                         FROM ReviewState
                         WHERE user_id = u.user_id AND next_review_at <= GETDATE()
-                        ORDER BY next_review_at ASC -- เอาคำที่เก่าที่สุด/สำคัญที่สุดมาทบทวนก่อน
+                        ORDER BY next_review_at ASC 
                     ) AS SubQuery) as due_count
                 FROM [User] u
                 WHERE EXISTS (
@@ -120,6 +120,21 @@ export class SqlNotificationRepository implements INotificationRepository {
 
     async addToQueue(userId: string, itemId: string | null, scheduledAt: Date, message?: string): Promise<void> {
         const req = await this.getRequest();
+        // 🎯 เพิ่มการเช็ค: ถ้ามี User คนนี้รออยู่ใน Queue สถานะ pending แล้ว "ห้ามเพิ่มซ้ำ"
+        const checkQuery = `
+            SELECT 1 FROM NotificationQueue 
+            WHERE user_id = @userId AND status = 'pending'
+        `;
+        
+        const existing = await req
+            .input('userId', sql.UniqueIdentifier, userId)
+            .query(checkQuery);
+
+        if (existing.recordset.length > 0) {
+            console.log(`⚠️ Skip: User ${userId} already has a pending notification.`);
+            return;
+        }
+        
         await req
             .input('id', sql.UniqueIdentifier, uuidv4())
             .input('userId', sql.UniqueIdentifier, userId)
