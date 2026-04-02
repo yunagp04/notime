@@ -263,9 +263,9 @@ export class SqlVocabRepository implements IVocabRepository {
                     li.content as definition,
                     ie.vector_data
                 FROM LearningItem li
-                JOIN UserLearningItem uli ON li.learning_item_id = uli.learning_item_id
+                JOIN ReviewState rs ON li.learning_item_id = rs.learning_item_id
                 JOIN ItemEmbedding ie ON li.learning_item_id = ie.learning_item_id
-                WHERE uli.user_id = @userId
+                WHERE rs.user_id = @userId
             `);
 
         const items = result.recordset.map(row => {
@@ -368,9 +368,10 @@ export class SqlVocabRepository implements IVocabRepository {
             .input('userId', sql.UniqueIdentifier, userId)
             .input('listId', sql.UniqueIdentifier, listId)
             .query(`
-                SELECT * FROM LearningItem 
-                WHERE user_id = @userId AND list_id = @listId
-                ORDER BY next_review_at ASC -- 🎯 เน้นทบทวนคำที่ใกล้ลืมก่อนในลิสต์นี้
+                SELECT li.* FROM LearningItem li
+                JOIN ReviewState rs ON li.learning_item_id = rs.learning_item_id
+                WHERE rs.user_id = @userId AND li.list_id = @listId
+                ORDER BY rs.next_review_at ASC
             `);
         return result.recordset;
     }

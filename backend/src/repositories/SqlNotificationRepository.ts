@@ -62,14 +62,14 @@ export class SqlNotificationRepository implements INotificationRepository {
                 SELECT u.user_id, 
                     (SELECT COUNT(*) FROM (
                         SELECT TOP (@max) learning_item_id 
-                        FROM LearningItem 
+                        FROM ReviewState
                         WHERE user_id = u.user_id AND next_review_at <= GETDATE()
                         ORDER BY next_review_at ASC -- เอาคำที่เก่าที่สุด/สำคัญที่สุดมาทบทวนก่อน
                     ) AS SubQuery) as due_count
                 FROM [User] u
                 WHERE EXISTS (
-                    SELECT 1 FROM LearningItem li 
-                    WHERE li.user_id = u.user_id AND li.next_review_at <= GETDATE()
+                    SELECT 1 FROM ReviewState rs
+                    WHERE rs.user_id = u.user_id AND rs.next_review_at <= GETDATE()
                 )
             `);
         return result.recordset;
@@ -81,7 +81,7 @@ export class SqlNotificationRepository implements INotificationRepository {
             .input('userId', sql.UniqueIdentifier, userId)
             .query(`
                 SELECT COUNT(*) as count 
-                FROM LearningItem 
+                FROM ReviewState
                 WHERE user_id = @userId AND next_review_at <= GETDATE()
             `);
         return result.recordset[0]?.count || 0;
@@ -99,18 +99,17 @@ export class SqlNotificationRepository implements INotificationRepository {
 
     async getWordsForNotification(userId: string, mode: string, listId?: string, limit: number = 10): Promise<any[]> {
         const req = await this.getRequest();
-        let query = `SELECT TOP (@limit) learning_item_id FROM LearningItem WHERE user_id = @userId `;
+        let query = `SELECT TOP (@limit) learning_item_id FROM ReviewState WHERE user_id = @userId AND next_review_at <= GETDATE() `;
 
-        if (mode === 'list' && listId) {
-            query += `AND list_id = @listId `;
-        }
-        
-        if (mode === 'random') {
-            query += `ORDER BY NEWID()`; // สุ่ม
-        } else {
-            query += `AND next_review_at <= GETDATE() ORDER BY next_review_at ASC`; // ตามรอบ
-        }
-
+            if (mode === 'list' && listId) {
+                query += `AND list_id = @listId `;
+            }
+            
+            if (mode === 'random') {
+                query += `ORDER BY NEWID()`; 
+            } else {
+                query += `ORDER BY next_review_at ASC`; 
+            }
         const result = await req
             .input('userId', sql.UniqueIdentifier, userId)
             .input('listId', sql.UniqueIdentifier, listId)
