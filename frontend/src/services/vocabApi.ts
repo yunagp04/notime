@@ -1,4 +1,4 @@
-const API_ROOT = import.meta.env.VITE_API_BASE_URL || "";
+const API_ROOT = process.env.REACT_APP_API_URL || "";
 const BASE_URL = `${API_ROOT}/api/vocab`;
 // const USER_ID = "888f10a9-6345-4a8a-99a1-79984863acf1";
 
