@@ -115,7 +115,7 @@ export const generateAIDefinition = async (word: string) => {
 
 // Fetch summary metrics including learning progress and history
 export const getSummary = async () => {
-  const response = await fetch(`${BASE_URL}/summary`);
+  const response = await fetch(`${BASE_URL}/summary`, { headers: getHeaders() });
   if (!response.ok) throw new Error("Failed to fetch summary data.");
   return response.json();
 };

@@ -1,5 +1,7 @@
+import { useEffect, useState } from "react";
 import { BrowserRouter, Routes, Route, useNavigate, useLocation } from "react-router-dom";
 import { LayoutDashboard, ChevronUp } from 'lucide-react';
+import { supabase } from './lib/supabase';
 
 import Navbar from "./components/Navbar";
 import Dashboard from "./pages/Dashboard";
@@ -56,12 +58,52 @@ const GlobalScrollToTop = () => {
 };
 
 function App() {
+  const [session, setSession] = useState<any>(null);
+
+  useEffect(() => {
+    // 1. เช็ค Session ปัจจุบันตอนเปิดแอป
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setSession(session);
+      if (session) {
+        localStorage.setItem('token', session.access_token); // 💳 เก็บแต้มบุญ (Token)
+      }
+    });
+
+    // 2. คอยฟังการเปลี่ยนแปลง (เช่น Login สำเร็จ หรือ Log out)
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      setSession(session);
+      if (session) {
+        localStorage.setItem('token', session.access_token);
+      } else {
+        localStorage.removeItem('token'); // ล้างบัตรทิ้งถ้าออกระบบ
+      }
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
+
+  // 🎯 ถ้ายังไม่มี Session ให้โชว์หน้า Login แบบง่ายๆ ไปก่อน
+  if (!session) {
+    return (
+      <div className="flex flex-col items-center justify-center h-screen bg-slate-50">
+        <h1 className="text-2xl font-bold mb-6 text-indigo-900">Intelligent Recall Platform</h1>
+        <button 
+          onClick={() => supabase.auth.signInWithOAuth({ provider: 'google', options: { redirectTo: window.location.origin } })}
+          className="px-6 py-3 bg-white border border-slate-200 rounded-xl shadow-sm hover:shadow-md transition-all flex items-center gap-3 font-semibold text-slate-700"
+        >
+          <img src="https://www.google.com/favicon.ico" alt="google" className="w-5 h-5" />
+          Login with Google
+        </button>
+      </div>
+    );
+  }
+
+  // 🎯 ถ้า Login แล้ว ให้โชว์หน้าแอปปกติของคุณ Paweena
   return (
     <BrowserRouter>
       <Navbar />
       <GlobalBackButton />
       <GlobalScrollToTop />
-
       <Routes>
         <Route path="/" element={<Dashboard />} />
         <Route path="/vocab" element={<VocabPage />} />
