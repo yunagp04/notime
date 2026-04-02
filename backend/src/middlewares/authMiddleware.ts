@@ -2,46 +2,48 @@ import { Request, Response, NextFunction } from "express";
 import { supabase } from "../config/supabaseClient";
 import { PostgresUserRepository } from "../repositories/PostgresUserRepository";
 
-const userRepo = new PostgresUserRepository();
+const userRepo = new PostgresUserRepository(supabase)
 
 export const authMiddleware = async (req: any, res: Response, next: NextFunction) => {
     try {
-        // 1. ดึง Token จาก Header "Authorization: Bearer <token>"
         const authHeader = req.headers.authorization;
         if (!authHeader || !authHeader.startsWith('Bearer ')) {
             return res.status(401).json({ message: "Unauthorized: No token provided" });
         }
-
-        const token = authHeader.split(' ')[1];
+        const token = authHeader.split(' ')[1]; // ดึงเฉพาะตัว Token ออกมา
 
         // 2. ตรวจสอบ Token กับ Supabase Auth
         const { data: { user }, error } = await supabase.auth.getUser(token);
 
         if (error || !user) {
             console.error("❌ Supabase Auth Error:", error?.message);
-            return res.status(401).json({ message: "Unauthorized: Invalid or expired token" });
+            return res.status(401).json({ message: "Unauthorized: Invalid token" });
         }
 
-        // 3. ตรวจสอบว่ามีข้อมูลในตาราง AppUser_M ของเราหรือยัง
-        let dbUser = await userRepo.getUserByUserId(user.id);
+        const providerUserId = user.id; 
+        const email = user.email || "";
+        const name = user.user_metadata?.display_name || "User";
+
+        // 3. ตรวจสอบในตาราง AppUser_M
+        let dbUser = await userRepo.getUserByAuthProviderID(providerUserId);
 
         if (!dbUser) {
-            // ถ้ายังไม่มี (เช่น ล็อคอินครั้งแรกหลังย้ายบ้าน) ให้สร้างลง AppUser_M ทันที
-            console.log(`🆕 Registering user to AppUser_M: ${user.email}`);
+            console.log("🔥 First time login: Registering user to AppUser_M...");
             dbUser = await userRepo.registerNewUser({
-                user_id: user.id,
-                email: user.email || '',
-                name: user.user_metadata.display_name || 'New User'
+                email,
+                name,
+                provider: "google",
+                providerUserId 
             });
         }
 
-        // 4. ส่ง user_id ต่อไปให้ Controller อื่นๆ ใช้งาน
-        req.userId = dbUser.user_id;
+        // 4. ส่ง user_id ต่อไป (เช็คให้ชัวร์ว่าใน Repo คืนค่าชื่อ user_id หรือ id)
+        req.userId = dbUser.user_id; 
         next();
 
     } catch (err: any) {
         console.error("❌ Auth Middleware Fatal Error:", err.message);
-        return res.status(500).json({ message: "Internal server error during authentication" });
+        return res.status(500).json({ message: "Internal server error" });
     }
 };
 
